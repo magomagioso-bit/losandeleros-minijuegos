@@ -53,8 +53,91 @@
 
   .locked {
     opacity: 0.3;
-    cursor
-    </script>
+    cursor: not-allowed;
+  }
+
+  /* Partículas dopamina */
+  .particle {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: #ffcc00;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: fly 1s linear forwards;
+  }
+
+  @keyframes fly {
+    from { transform: translateY(0) scale(1); opacity: 1; }
+    to { transform: translateY(-150px) scale(0.2); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🎮 Minijuegos del Clan</h1>
+
+<div id="nivelBox">Nivel actual: <span id="nivel">1</span></div>
+
+<h2>Selecciona un nivel</h2>
+
+<div id="botones"></div>
+
+<script>
+/* -------------------------
+   SISTEMA DE NIVELES
+-------------------------- */
+let nivel = Number(localStorage.getItem("nivel")) || 1;
+document.getElementById("nivel").textContent = nivel;
+
+/* -------------------------
+   LISTA DE MINIJUEGOS
+-------------------------- */
+const juegos = [
+  { nombre: "Nivel 1: Snake", archivo: "snake.html" },
+  { nombre: "Nivel 2: Pong", archivo: "pong.html" },
+  { nombre: "Nivel 3: Memory", archivo: "memory.html" },
+  { nombre: "Nivel 4: Laberinto", archivo: "laberinto.html" },
+  { nombre: "Nivel 5: Obstáculos", archivo: "obstaculos.html" },
+  { nombre: "Nivel 6: Simon Dice", archivo: "simondice.html" }
+];
+
+/* -------------------------
+   CREAR BOTONES
+-------------------------- */
+const cont = document.getElementById("botones");
+
+juegos.forEach((juego, i) => {
+  const btn = document.createElement("button");
+  btn.textContent = juego.nombre;
+
+  if (i + 1 > nivel) {
+    btn.classList.add("locked");
+  } else {
+    btn.onclick = () => {
+      dopamina();
+      setTimeout(() => window.location.href = juego.archivo, 300);
+    };
+  }
+
+  cont.appendChild(btn);
+});
+
+/* -------------------------
+   EFECTO DOPAMINA
+-------------------------- */
+function dopamina() {
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement("div");
+    p.classList.add("particle");
+    p.style.left = (window.innerWidth / 2 + (Math.random() * 100 - 50)) + "px";
+    p.style.top = (window.innerHeight / 2) + "px";
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+  }
+}
+</script>
+
 </body>
 </html>
 
