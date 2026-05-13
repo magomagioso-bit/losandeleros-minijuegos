@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Minijuegos con Niveles</title>
+<style>
+  body {
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+  .hidden { display: none; }
+  button {
+    padding: 12px 25px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #ffcc00;
+    color: black;
+    margin: 10px;
+    transition: transform .1s;
+  }
+  button:active { transform: scale(0.95); }
+  #nivelBox {
+    background: #222;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 22px;
+  }
+  .victoria {
+    font-size: 28px;
+    color: #00ff88;
+    animation: pop 0.4s ease;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div id="nivelBox">Nivel actual: <span id="nivel">1</span></div>
+
+<div id="menu">
+  <h1>Minijuegos</h1>
+  <p>Completa cada nivel para desbloquear el siguiente.</p>
+  <button onclick="jugar(1)">Nivel 1: Adivina el Número</button>
+  <button onclick="jugar(2)" id="btn2" class="hidden">Nivel 2: Reflejos</button>
+  <button onclick="jugar(3)" id="btn3" class="hidden">Nivel 3: 3 en Raya</button>
+</div>
+
+<!-- NIVEL 1: ADIVINA EL NÚMERO -->
+<div id="nivel1" class="hidden">
+  <h2>Adivina el Número (1-50)</h2>
+  <input type="number" id="num" placeholder="Tu número">
+  <button onclick="comprobar()">Probar</button>
+  <p id="msg1"></p>
+</div>
+
+<!-- NIVEL 2: REFLEJOS -->
+<div id="nivel2" class="hidden">
+  <h2>Juego de Reflejos</h2>
+  <p>Haz clic cuando el botón se ponga VERDE</p>
+  <button id="refBtn" style="background:red;" onclick="reflejosClick()">Espera...</button>
+  <p id="msg2"></p>
+</div>
+
+<!-- NIVEL 3: 3 EN RAYA -->
+<div id="nivel3" class="hidden">
+  <h2>3 en Raya</h2>
+  <div id="tablero" style="display:grid;grid-template-columns:repeat(3,100px);gap:5px;justify-content:center;"></div>
+  <p id="msg3"></p>
+</div>
+
+<script>
+let nivel = 1;
+let secreto = Math.floor(Math.random()*50)+1;
+let intentos = 0;
+
+// Mostrar nivel
+function actualizarNivel() {
+  document.getElementById("nivel").textContent = nivel;
+  if (nivel >= 2) document.getElementById("btn2").classList.remove("hidden");
+  if (nivel >= 3) document.getElementById("btn3").classList.remove("hidden");
+}
+
+// Cambiar de pantalla
+function jugar(n) {
+  document.getElementById("menu").classList.add("hidden");
+  document.getElementById("nivel"+n).classList.remove("hidden");
+}
+
+// VOLVER AL MENÚ
+function victoria(n) {
+  nivel++;
+  actualizarNivel();
+
+  alert("¡Nivel completado! 🎉");
+  document.getElementById("nivel"+n).classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
+}
+
+/* ---------------- NIVEL 1 ---------------- */
+function comprobar() {
+  const n = Number(document.getElementById("num").value);
+  intentos++;
+
+  if (n < secreto) msg1.textContent = "Más alto ⬆️";
+  else if (n > secreto) msg1.textContent = "Más bajo ⬇️";
+  else {
+    msg1.innerHTML = "<span class='victoria'>¡Correcto! 🎉</span>";
+    setTimeout(()=>victoria(1), 800);
+  }
+}
+
+/* ---------------- NIVEL 2 ---------------- */
+let puedeClick = false;
+
+setTimeout(()=>{
+  const btn = document.getElementById("refBtn");
+  btn.style.background = "green";
+  btn.textContent = "¡YA!";
+  puedeClick = true;
+}, Math.random()*3000+1000);
+
+function reflejosClick() {
+  if (!puedeClick) {
+    msg2.textContent = "Muy pronto 😅";
+    return;
+  }
+  msg2.innerHTML = "<span class='victoria'>¡Reflejos perfectos! ⚡</span>";
+  setTimeout(()=>victoria(2), 800);
+}
+
+/* ---------------- NIVEL 3 ---------------- */
+let turno = "X";
+let tablero = ["","","","","","","","",""];
+
+function iniciar3Raya() {
+  const t = document.getElementById("tablero");
+  t.innerHTML = "";
+  tablero = ["","","","","","","","",""];
+  turno = "X";
+
+  for (let i=0;i<9;i++) {
+    const c = document.createElement("button");
+    c.style.width="100px";
+    c.style.height="100px";
+    c.style.fontSize="40px";
+    c.onclick = ()=>poner(i,c);
+    t.appendChild(c);
+  }
+}
+
+function poner(i,c) {
+  if (tablero[i] !== "") return;
+  tablero[i] = turno;
+  c.textContent = turno;
+
+  if (ganar(turno)) {
+    msg3.innerHTML = "<span class='victoria'>¡Ganaste! 🏆</span>";
+    setTimeout(()=>victoria(3), 800);
+    return;
+  }
+
+  turno = turno === "X" ? "O" : "X";
+}
+
+function ganar(p) {
+  const w = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  return w.some(c => c.every(i => tablero[i] === p));
+}
+
+iniciar3Raya();
+</script>
+
+</body>
+</html>
