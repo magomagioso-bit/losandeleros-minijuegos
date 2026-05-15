@@ -24,6 +24,7 @@
     transition: transform .1s;
   }
   button:active { transform: scale(0.95); }
+
   #nivelBox {
     background: #222;
     padding: 15px;
@@ -46,6 +47,7 @@
     color: #00ff88;
     animation: pop 0.4s ease;
   }
+
   @keyframes pop {
     0% { transform: scale(0.5); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
@@ -59,6 +61,258 @@
     justify-content: center;
     margin-top: 15px;
   }
+
   .cell {
     width: 40px;
-    height
+    height: 40px;
+    background: #333;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .cell.revealed {
+    background: #555;
+    cursor: default;
+  }
+
+  .cell.mine {
+    background: #ff4444;
+  }
+</style>
+</head>
+<body>
+
+<div id="nivelBox">Nivel actual: <span id="nivel">1</span></div>
+<div id="xpBox">XP: <span id="xp">0</span></div>
+
+<div id="menu">
+  <h1>Minijuegos</h1>
+  <p>Completa cada nivel para desbloquear el siguiente.</p>
+  <button onclick="jugar(1)">Nivel 1: Adivina el Número</button>
+  <button onclick="jugar(2)" id="btn2" class="hidden">Nivel 2: Buscaminas</button>
+  <button onclick="jugar(3)" id="btn3" class="hidden">Nivel 3: 3 en Raya</button>
+</div>
+
+<!-- NIVEL 1 -->
+<div id="nivel1" class="hidden">
+  <h2>Adivina el Número (1-50)</h2>
+  <input type="number" id="num" placeholder="Tu número">
+  <button onclick="comprobar()">Probar</button>
+  <p id="msg1"></p>
+</div>
+
+<!-- NIVEL 2 -->
+<div id="nivel2" class="hidden">
+  <h2>Buscaminas (6x6)</h2>
+  <p>Haz clic en las casillas que NO tienen mina.</p>
+  <div id="minesGrid"></div>
+  <p id="msg2"></p>
+</div>
+
+<!-- NIVEL 3 -->
+<div id="nivel3" class="hidden">
+  <h2>3 en Raya</h2>
+  <div id="tablero" style="display:grid;grid-template-columns:repeat(3,100px);gap:5px;justify-content:center;"></div>
+  <p id="msg3"></p>
+</div>
+
+<script>
+let nivel = 1;
+let secreto = Math.floor(Math.random()*50)+1;
+let xp = 0;
+
+const xpSpan = document.getElementById("xp");
+const nivelSpan = document.getElementById("nivel");
+const btn2 = document.getElementById("btn2");
+const btn3 = document.getElementById("btn3");
+
+function ganarXP(cantidad) {
+  xp += cantidad;
+  xpSpan.textContent = xp;
+}
+
+function actualizarNivel() {
+  nivelSpan.textContent = nivel;
+  if (nivel >= 2) btn2.classList.remove("hidden");
+  if (nivel >= 3) btn3.classList.remove("hidden");
+}
+
+function jugar(n) {
+  document.getElementById("menu").classList.add("hidden");
+  document.getElementById("nivel"+n).classList.remove("hidden");
+  if (n === 2) iniciarBuscaminas();
+  if (n === 3) iniciar3Raya();
+}
+
+function victoria(n) {
+  if (n === 1) ganarXP(50);
+  if (n === 2) ganarXP(100);
+  if (n === 3) ganarXP(150);
+
+  nivel++;
+  actualizarNivel();
+  alert("¡Nivel " + n + " completado! 🎉");
+
+  document.getElementById("nivel"+n).classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
+}
+
+/* NIVEL 1 */
+const msg1 = document.getElementById("msg1");
+
+function comprobar() {
+  const n = Number(document.getElementById("num").value);
+
+  if (n < secreto) msg1.textContent = "Más alto ⬆️";
+  else if (n > secreto) msg1.textContent = "Más bajo ⬇️";
+  else {
+    msg1.innerHTML = "<span class='victoria'>¡Correcto! 🎉</span>";
+    setTimeout(()=>victoria(1), 800);
+  }
+}
+
+/* NIVEL 2 */
+const grid = document.getElementById("minesGrid");
+const msg2 = document.getElementById("msg2");
+let mines = [];
+let revealedCount = 0;
+const size = 6;
+const totalCells = size * size;
+const totalMines = 6;
+
+function iniciarBuscaminas() {
+  grid.innerHTML = "";
+  msg2.textContent = "";
+  mines = [];
+  revealedCount = 0;
+
+  while (mines.length < totalMines) {
+    const r = Math.floor(Math.random()*totalCells);
+    if (!mines.includes(r)) mines.push(r);
+  }
+
+  for (let i = 0; i < totalCells; i++) {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+    cell.dataset.index = i;
+    cell.onclick = () => revealCell(cell);
+    grid.appendChild(cell);
+  }
+}
+
+function getNeighbors(index) {
+  const neighbors = [];
+  const row = Math.floor(index / size);
+  const col = index % size;
+
+  for (let r = -1; r <= 1; r++) {
+    for (let c = -1; c <= 1; c++) {
+      if (r === 0 && c === 0) continue;
+      const nr = row + r;
+      const nc = col + c;
+      if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+        neighbors.push(nr * size + nc);
+      }
+    }
+  }
+  return neighbors;
+}
+
+function countMinesAround(index) {
+  return getNeighbors(index).filter(i => mines.includes(i)).length;
+}
+
+function revealCell(cell) {
+  if (cell.classList.contains("revealed")) return;
+
+  cell.classList.add("revealed");
+  const index = Number(cell.dataset.index);
+
+  if (mines.includes(index)) {
+    cell.classList.add("mine");
+    cell.textContent = "💣";
+    msg2.textContent = "¡BOOM! Has pisado una mina 😵";
+    Array.from(document.getElementsByClassName("cell")).forEach(c => c.onclick = null);
+    return;
+  }
+
+  revealedCount++;
+  ganarXP(1);
+
+  const count = countMinesAround(index);
+  if (count > 0) {
+    cell.textContent = count;
+  } else {
+    getNeighbors(index).forEach(i => {
+      const neighbor = grid.children[i];
+      if (neighbor && !neighbor.classList.contains("revealed")) {
+        revealCell(neighbor);
+      }
+    });
+  }
+
+  if (revealedCount === totalCells - totalMines) {
+    msg2.innerHTML = "<span class='victoria'>¡Has limpiado el campo! 🏆</span>";
+    Array.from(document.getElementsByClassName("cell")).forEach(c => c.onclick = null);
+    setTimeout(()=>victoria(2), 800);
+  }
+}
+
+/* NIVEL 3 */
+function iniciar3Raya() {
+  const tablero = document.getElementById("tablero");
+  tablero.innerHTML = "";
+  let turno = "X";
+  let celdas = Array(9).fill("");
+
+  function checkWin() {
+    const wins = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    return wins.some(w =>
+      celdas[w[0]] !== "" &&
+      celdas[w[0]] === celdas[w[1]] &&
+      celdas[w[1]] === celdas[w[2]]
+    );
+  }
+
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement("div");
+    cell.style.width = "100px";
+    cell.style.height = "100px";
+    cell.style.background = "#333";
+    cell.style.display = "flex";
+    cell.style.alignItems = "center";
+    cell.style.justifyContent = "center";
+    cell.style.fontSize = "40px";
+    cell.style.cursor = "pointer";
+
+    cell.onclick = () => {
+      if (celdas[i] !== "") return;
+
+      celdas[i] = turno;
+      cell.textContent = turno;
+
+      if (checkWin()) {
+        ganarXP(150);
+        document.getElementById("msg3").innerHTML = "<span class='victoria'>¡Has ganado! 🎉</span>";
+        setTimeout(()=>victoria(3), 800);
+        return;
+      }
+
+      turno = turno === "X" ? "O" : "X";
+    };
+
+    tablero.appendChild(cell);
+  }
+}
+</script>
+
+</body>
+</html>
