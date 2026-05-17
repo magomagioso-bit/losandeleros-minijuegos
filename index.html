@@ -128,6 +128,7 @@ let nivel = 1;
 let secreto = Math.floor(Math.random()*50)+1;
 let xp = 0;
 let victoriasBuscaminas = 0;
+let juegoTerminado = false;
 
 const xpSpan = document.getElementById("xp");
 const nivelSpan = document.getElementById("nivel");
@@ -214,9 +215,10 @@ let mines = [];
 let revealedCount = 0;
 const size = 6;
 const totalCells = size * size;
-const totalMines = 3; // ⭐ MÁS FÁCIL: SOLO 3 MINAS
+const totalMines = 3;
 
 function iniciarBuscaminas() {
+  juegoTerminado = false;
   grid.innerHTML = "";
   msg2.textContent = "";
   mines = [];
@@ -234,6 +236,12 @@ function iniciarBuscaminas() {
     cell.onclick = () => revealCell(cell);
     grid.appendChild(cell);
   }
+
+  const btnWeb = document.createElement("button");
+  btnWeb.textContent = "Ir a losandeleros";
+  btnWeb.onclick = () => window.location.href = "https://losandeleros.onrender.com";
+  msg2.innerHTML = "";
+  msg2.appendChild(btnWeb);
 }
 
 function getNeighbors(index) {
@@ -259,18 +267,18 @@ function countMinesAround(index) {
 }
 
 function revealCell(cell) {
+  if (juegoTerminado) return;
   if (cell.classList.contains("revealed")) return;
 
   cell.classList.add("revealed");
   const index = Number(cell.dataset.index);
 
   if (mines.includes(index)) {
+    juegoTerminado = true;
     cell.classList.add("mine");
     cell.textContent = "💣";
     msg2.textContent = "¡BOOM! Has pisado una mina 😵";
-
     victoriasBuscaminas = 0;
-
     setTimeout(() => iniciarBuscaminas(), 800);
     return;
   }
@@ -291,8 +299,8 @@ function revealCell(cell) {
   }
 
   if (revealedCount === totalCells - totalMines) {
+    juegoTerminado = true;
     msg2.innerHTML = "<span class='victoria'>¡Has limpiado el campo! 🏆</span>";
-    Array.from(document.getElementsByClassName("cell")).forEach(c => c.onclick = null);
     setTimeout(()=>victoria(2), 800);
   }
 }
@@ -351,4 +359,3 @@ function iniciar3Raya() {
 
 </body>
 </html>
-
