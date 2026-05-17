@@ -214,7 +214,7 @@ let mines = [];
 let revealedCount = 0;
 const size = 6;
 const totalCells = size * size;
-const totalMines = 6;
+const totalMines = 3; // ⭐ MÁS FÁCIL: SOLO 3 MINAS
 
 function iniciarBuscaminas() {
   grid.innerHTML = "";
@@ -268,7 +268,10 @@ function revealCell(cell) {
     cell.classList.add("mine");
     cell.textContent = "💣";
     msg2.textContent = "¡BOOM! Has pisado una mina 😵";
-    Array.from(document.getElementsByClassName("cell")).forEach(c => c.onclick = null);
+
+    victoriasBuscaminas = 0;
+
+    setTimeout(() => iniciarBuscaminas(), 800);
     return;
   }
 
