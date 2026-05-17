@@ -132,242 +132,6 @@
   <p id="msg3"></p>
 </div>
 
-<!-- NIVEL 4: SNAKE -->
-<div id="nivel4" class="hidden">
-  <h2>Snake</h2>
-  <button onclick="volverMenu()">Volver al menú</button>
-  <canvas id="snakeCanvas" width="400" height="400"></canvas>
-  <p id="msg4"></p>
-</div>
-
-<script>
-/* VARIABLES GENERALES */
-let nivel = 1;
-let secreto = Math.floor(Math.random()*50)+1;
-let xp = 0;
-let victoriasBuscaminas = 0;
-let juegoTerminado = false;
-
-const xpSpan = document.getElementById("xp");
-const nivelSpan = document.getElementById("nivel");
-const btn2 = document.getElementById("btn2");
-const btn3 = document.getElementById("btn3");
-const btn4 = document.getElementById("btn4");
-const msg1 = document.getElementById("msg1");
-const msg2 = document.getElementById("msg2");
-
-/* MENÚ */
-function volverMenu() {
-  document.querySelectorAll("[id^='nivel']").forEach(div => div.classList.add("hidden"));
-  document.getElementById("menu").classList.remove("hidden");
-}
-
-function ganarXP(cantidad) {
-  xp += cantidad;
-  xpSpan.textContent = xp;
-}
-
-function actualizarNivel() {
-  nivelSpan.textContent = nivel;
-  if (nivel >= 2) btn2.classList.remove("hidden");
-  if (nivel >= 3) btn3.classList.remove("hidden");
-  if (nivel >= 4) btn4.classList.remove("hidden");
-}
-
-function jugar(n) {
-  document.getElementById("menu").classList.add("hidden");
-  document.getElementById("nivel"+n).classList.remove("hidden");
-
-  if (n === 1) {
-    secreto = Math.floor(Math.random()*50)+1;
-    msg1.textContent = "";
-    document.getElementById("num").value = "";
-  }
-
-  if (n === 2) iniciarBuscaminas();
-  if (n === 3) iniciar3Raya();
-  if (n === 4) iniciarSnake();
-}
-
-function victoria(n) {
-  if (n === 1) ganarXP(50);
-  if (n === 2) ganarXP(100);
-  if (n === 3) ganarXP(150);
-  if (n === 4) ganarXP(200);
-
-  if (n === 2) {
-    victoriasBuscaminas++;
-    if (victoriasBuscaminas >= 3) {
-      victoriasBuscaminas = 0;
-      alert("¡Has ganado 3 veces seguidas en Buscaminas!");
-      volverMenu();
-      return;
-    }
-  }
-
-  nivel++;
-  actualizarNivel();
-  alert("¡Nivel " + n + " completado!");
-  volverMenu();
-}
-
-/* NIVEL 1 */
-function comprobar() {
-  const n = Number(document.getElementById("num").value);
-
-  if (!n) {
-    msg1.textContent = "Escribe un número 😉";
-    return;
-  }
-
-  if (n < secreto) msg1.textContent = "Más alto ⬆️";
-  else if (n > secreto) msg1.textContent = "Más bajo ⬇️";
-  else {
-    msg1.innerHTML = "<span class='victoria'>¡Correcto! 🎉</span>";
-    setTimeout(()=>victoria(1), 800);
-  }
-}
-
-/* NIVEL 2: BUSCAMINAS */
-const grid = document.getElementById("minesGrid");
-let mines = [];
-let revealedCount = 0;
-const size = 6;
-const totalCells = size * size;
-const totalMines = 3;
-
-function iniciarBuscaminas() {
-  juegoTerminado = false;
-  grid.innerHTML = "";
-  msg2.textContent = "";
-  mines = [];
-  revealedCount = 0;
-
-  while (mines.length < totalMines) {
-    const r = Math.floor(Math.random()*totalCells);
-    if (!mines.includes(r)) mines.push(r);
-  }
-
-  for (let i = 0; i < totalCells; i++) {
-    const cell = document.createElement("div");
-    cell.classList.add("cell");
-    cell.dataset.index = i;
-    cell.onclick = () => revealCell(cell);
-    grid.appendChild(cell);
-  }
-}
-
-function getNeighbors(index) {
-  const neighbors = [];
-  const row = Math.floor(index / size);
-  const col = index % size;
-
-  for (let r = -1; r <= 1; r++) {
-    for (let c = -1; c <= 1; c++) {
-      if (r === 0 && c === 0) continue;
-      const nr = row + r;
-      const nc = col + c;
-      if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-        neighbors.push(nr * size + nc);
-      }
-    }
-  }
-  return neighbors;
-}
-
-function countMinesAround(index) {
-  return getNeighbors(index).filter(i => mines.includes(i)).length;
-}
-
-function revealCell(cell) {
-  if (juegoTerminado) return;
-  if (cell.classList.contains("revealed")) return;
-
-  cell.classList.add("revealed");
-  const index = Number(cell.dataset.index);
-
-  if (mines.includes(index)) {
-    juegoTerminado = true;
-    cell.classList.add("mine");
-    cell.textContent = "💣";
-    msg2.textContent = "¡BOOM!";
-    victoriasBuscaminas = 0;
-    setTimeout(() => iniciarBuscaminas(), 800);
-    return;
-  }
-
-  revealedCount++;
-  ganarXP(1);
-
-  const count = countMinesAround(index);
-  if (count > 0) {
-    cell.textContent = count;
-  } else {
-    getNeighbors(index).forEach(i => {
-      const neighbor = grid.children[i];
-      if (neighbor && !neighbor.classList.contains("revealed")) {
-        revealCell(neighbor);
-      }
-    });
-  }
-
-  if (revealedCount === totalCells - totalMines) {
-    juegoTerminado = true;
-    msg2.innerHTML = "<span class='victoria'>¡Has limpiado el campo! 🏆</span>";
-    setTimeout(()=>victoria(2), 800);
-  }
-}
-
-/* NIVEL 3: 3 EN RAYA */
-function iniciar3Raya() {
-  const tablero = document.getElementById("tablero");
-  tablero.innerHTML = "";
-  let turno = "X";
-  let celdas = Array(9).fill("");
-
-  function checkWin() {
-    const wins = [
-      [0,1,2],[3,4,5],[6,7,8],
-      [0,3,6],[1,4,7],[2,5,8],
-      [0,4,8],[2,4,6]
-    ];
-    return wins.some(w =>
-      celdas[w[0]] !== "" &&
-      celdas[w[0]] === celdas[w[1]] &&
-      celdas[w[1]] === celdas[w[2]]
-    );
-  }
-
-  for (let i = 0; i < 9; i++) {
-    const cell = document.createElement("div");
-    cell.style.width = "100px";
-    cell.style.height = "100px";
-    cell.style.background = "#333";
-    cell.style.display = "flex";
-    cell.style.alignItems = "center";
-    cell.style.justifyContent = "center";
-    cell.style.fontSize = "40px";
-    cell.style.cursor = "pointer";
-
-    cell.onclick = () => {
-      if (celdas[i] !== "") return;
-
-      celdas[i] = turno;
-      cell.textContent = turno;
-
-      if (checkWin()) {
-        document.getElementById("msg3").innerHTML = "<span class='victoria'>¡Has ganado! 🎉</span>";
-        setTimeout(()=>victoria(3), 800);
-        return;
-      }
-
-      turno = turno === "X" ? "O" : "X";
-    };
-
-    tablero.appendChild(cell);
-  }
-}
-
 /* NIVEL 4: SNAKE */
 let snakeInterval;
 
@@ -379,7 +143,7 @@ function iniciarSnake() {
 
   const box = 20;
   let snake = [{x: 200, y: 200}];
-  let direction = "RIGHT";
+  let direction = null; // ⭐ NO SE MUEVE HASTA QUE PULSES
   let food = generarComida();
   let gameOver = false;
 
@@ -390,6 +154,7 @@ function iniciarSnake() {
     };
   }
 
+  // ⭐ Flechas + WASD
   document.onkeydown = (e) => {
     if (e.key === "ArrowUp" || e.key === "w") direction = "UP";
     if (e.key === "ArrowDown" || e.key === "s") direction = "DOWN";
@@ -402,6 +167,17 @@ function iniciarSnake() {
 
     ctx.clearRect(0,0,400,400);
 
+    // ⭐ Si no has pulsado nada, NO SE MUEVE
+    if (!direction) {
+      // dibujar serpiente quieta
+      ctx.fillStyle = "lime";
+      snake.forEach(s => ctx.fillRect(s.x, s.y, box, box));
+
+      ctx.fillStyle = "red";
+      ctx.fillRect(food.x, food.y, box, box);
+      return;
+    }
+
     let head = {...snake[0]};
 
     if (direction === "UP") head.y -= box;
@@ -413,7 +189,6 @@ function iniciarSnake() {
     if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400) {
       gameOver = true;
       document.getElementById("msg4").textContent = "¡Has perdido!";
-      victoriasBuscaminas = 0;
       setTimeout(() => volverMenu(), 1000);
       return;
     }
@@ -431,7 +206,7 @@ function iniciarSnake() {
     ctx.fillRect(food.x, food.y, box, box);
 
     ctx.fillStyle = "lime";
-    snake.forEach(s => ctx.fillRect(s.x, s.y, box, box));
+      snake.forEach(s => ctx.fillRect(s.x, s.y, box, box));
 
   }, 100);
 }
