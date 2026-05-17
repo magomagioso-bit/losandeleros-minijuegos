@@ -82,6 +82,13 @@
   .cell.mine {
     background: #ff4444;
   }
+
+  /* Snake */
+  #snakeCanvas {
+    background: #000;
+    border: 3px solid #fff;
+    margin-top: 20px;
+  }
 </style>
 </head>
 <body>
@@ -92,9 +99,11 @@
 <div id="menu">
   <h1>Minijuegos</h1>
   <p>Completa cada nivel para desbloquear el siguiente.</p>
+
   <button onclick="jugar(1)">Nivel 1: Adivina el Número</button>
   <button onclick="jugar(2)" id="btn2" class="hidden">Nivel 2: Buscaminas</button>
   <button onclick="jugar(3)" id="btn3" class="hidden">Nivel 3: 3 en Raya</button>
+  <button onclick="jugar(4)" id="btn4" class="hidden">Nivel 4: Snake</button>
 </div>
 
 <!-- NIVEL 1 -->
@@ -123,7 +132,16 @@
   <p id="msg3"></p>
 </div>
 
+<!-- NIVEL 4: SNAKE -->
+<div id="nivel4" class="hidden">
+  <h2>Snake</h2>
+  <button onclick="volverMenu()">Volver al menú</button>
+  <canvas id="snakeCanvas" width="400" height="400"></canvas>
+  <p id="msg4"></p>
+</div>
+
 <script>
+/* VARIABLES GENERALES */
 let nivel = 1;
 let secreto = Math.floor(Math.random()*50)+1;
 let xp = 0;
@@ -134,13 +152,13 @@ const xpSpan = document.getElementById("xp");
 const nivelSpan = document.getElementById("nivel");
 const btn2 = document.getElementById("btn2");
 const btn3 = document.getElementById("btn3");
+const btn4 = document.getElementById("btn4");
 const msg1 = document.getElementById("msg1");
 const msg2 = document.getElementById("msg2");
 
+/* MENÚ */
 function volverMenu() {
-  document.getElementById("nivel1").classList.add("hidden");
-  document.getElementById("nivel2").classList.add("hidden");
-  document.getElementById("nivel3").classList.add("hidden");
+  document.querySelectorAll("[id^='nivel']").forEach(div => div.classList.add("hidden"));
   document.getElementById("menu").classList.remove("hidden");
 }
 
@@ -153,6 +171,7 @@ function actualizarNivel() {
   nivelSpan.textContent = nivel;
   if (nivel >= 2) btn2.classList.remove("hidden");
   if (nivel >= 3) btn3.classList.remove("hidden");
+  if (nivel >= 4) btn4.classList.remove("hidden");
 }
 
 function jugar(n) {
@@ -161,24 +180,26 @@ function jugar(n) {
 
   if (n === 1) {
     secreto = Math.floor(Math.random()*50)+1;
-    document.getElementById("num").value = "";
     msg1.textContent = "";
+    document.getElementById("num").value = "";
   }
 
   if (n === 2) iniciarBuscaminas();
   if (n === 3) iniciar3Raya();
+  if (n === 4) iniciarSnake();
 }
 
 function victoria(n) {
   if (n === 1) ganarXP(50);
   if (n === 2) ganarXP(100);
   if (n === 3) ganarXP(150);
+  if (n === 4) ganarXP(200);
 
   if (n === 2) {
     victoriasBuscaminas++;
     if (victoriasBuscaminas >= 3) {
       victoriasBuscaminas = 0;
-      alert("¡Has ganado 3 veces seguidas en Buscaminas! Volviendo al menú...");
+      alert("¡Has ganado 3 veces seguidas en Buscaminas!");
       volverMenu();
       return;
     }
@@ -186,10 +207,8 @@ function victoria(n) {
 
   nivel++;
   actualizarNivel();
-  alert("¡Nivel " + n + " completado! 🎉");
-
-  document.getElementById("nivel"+n).classList.add("hidden");
-  document.getElementById("menu").classList.remove("hidden");
+  alert("¡Nivel " + n + " completado!");
+  volverMenu();
 }
 
 /* NIVEL 1 */
@@ -209,7 +228,7 @@ function comprobar() {
   }
 }
 
-/* NIVEL 2 */
+/* NIVEL 2: BUSCAMINAS */
 const grid = document.getElementById("minesGrid");
 let mines = [];
 let revealedCount = 0;
@@ -236,12 +255,6 @@ function iniciarBuscaminas() {
     cell.onclick = () => revealCell(cell);
     grid.appendChild(cell);
   }
-
-  const btnWeb = document.createElement("button");
-  btnWeb.textContent = "Ir a losandeleros";
-  btnWeb.onclick = () => window.location.href = "https://losandeleros.onrender.com";
-  msg2.innerHTML = "";
-  msg2.appendChild(btnWeb);
 }
 
 function getNeighbors(index) {
@@ -277,7 +290,7 @@ function revealCell(cell) {
     juegoTerminado = true;
     cell.classList.add("mine");
     cell.textContent = "💣";
-    msg2.textContent = "¡BOOM! Has pisado una mina 😵";
+    msg2.textContent = "¡BOOM!";
     victoriasBuscaminas = 0;
     setTimeout(() => iniciarBuscaminas(), 800);
     return;
@@ -305,7 +318,7 @@ function revealCell(cell) {
   }
 }
 
-/* NIVEL 3 */
+/* NIVEL 3: 3 EN RAYA */
 function iniciar3Raya() {
   const tablero = document.getElementById("tablero");
   tablero.innerHTML = "";
@@ -343,7 +356,6 @@ function iniciar3Raya() {
       cell.textContent = turno;
 
       if (checkWin()) {
-        ganarXP(150);
         document.getElementById("msg3").innerHTML = "<span class='victoria'>¡Has ganado! 🎉</span>";
         setTimeout(()=>victoria(3), 800);
         return;
@@ -354,6 +366,74 @@ function iniciar3Raya() {
 
     tablero.appendChild(cell);
   }
+}
+
+/* NIVEL 4: SNAKE */
+let snakeInterval;
+
+function iniciarSnake() {
+  clearInterval(snakeInterval);
+
+  const canvas = document.getElementById("snakeCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const box = 20;
+  let snake = [{x: 200, y: 200}];
+  let direction = "RIGHT";
+  let food = generarComida();
+  let gameOver = false;
+
+  function generarComida() {
+    return {
+      x: Math.floor(Math.random()*20)*box,
+      y: Math.floor(Math.random()*20)*box
+    };
+  }
+
+  document.onkeydown = (e) => {
+    if (e.key === "ArrowUp" || e.key === "w") direction = "UP";
+    if (e.key === "ArrowDown" || e.key === "s") direction = "DOWN";
+    if (e.key === "ArrowLeft" || e.key === "a") direction = "LEFT";
+    if (e.key === "ArrowRight" || e.key === "d") direction = "RIGHT";
+  };
+
+  snakeInterval = setInterval(() => {
+    if (gameOver) return;
+
+    ctx.clearRect(0,0,400,400);
+
+    let head = {...snake[0]};
+
+    if (direction === "UP") head.y -= box;
+    if (direction === "DOWN") head.y += box;
+    if (direction === "LEFT") head.x -= box;
+    if (direction === "RIGHT") head.x += box;
+
+    // choque con paredes
+    if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400) {
+      gameOver = true;
+      document.getElementById("msg4").textContent = "¡Has perdido!";
+      victoriasBuscaminas = 0;
+      setTimeout(() => volverMenu(), 1000);
+      return;
+    }
+
+    snake.unshift(head);
+
+    if (head.x === food.x && head.y === food.y) {
+      ganarXP(5);
+      food = generarComida();
+    } else {
+      snake.pop();
+    }
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, box, box);
+
+    ctx.fillStyle = "lime";
+    snake.forEach(s => ctx.fillRect(s.x, s.y, box, box));
+
+  }, 100);
 }
 </script>
 
