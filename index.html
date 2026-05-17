@@ -1,3 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Minijuegos con Niveles</title>
+<style>
+  body {
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+  .hidden { display: none; }
+  button {
+    padding: 12px 25px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 10px;
+    background: #ffcc00;
+    color: black;
+    transition: transform .1s;
+  }
+  button:active { transform: scale(0.95); }
+
+  #nivelBox {
+    background: #222;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 22px;
+  }
+
+  #xpBox {
+    background: #222;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #00ffcc;
+  }
+
+  .victoria {
+    font-size: 28px;
+    color: #00ff88;
+    animation: pop 0.4s ease;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Buscaminas */
+  #minesGrid {
+    display: grid;
+    grid-template-columns: repeat(6, 40px);
+    gap: 4px;
+    justify-content: center;
+    margin-top: 15px;
+  }
+
+  .cell {
+    width: 40px;
+    height: 40px;
+    background: #333;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .cell.revealed {
+    background: #555;
+    cursor: default;
+  }
+
+  .cell.mine {
+    background: #ff4444;
+  }
+</style>
+</head>
+<body>
+
+<div id="nivelBox">Nivel actual: <span id="nivel">1</span></div>
+<div id="xpBox">XP: <span id="xp">0</span></div>
+
+<div id="menu">
+  <h1>Minijuegos</h1>
+  <p>Completa cada nivel para desbloquear el siguiente.</p>
+  <button onclick="jugar(1)">Nivel 1: Adivina el Número</button>
+  <button onclick="jugar(2)" id="btn2" class="hidden">Nivel 2: Buscaminas</button>
+  <button onclick="jugar(3)" id="btn3" class="hidden">Nivel 3: 3 en Raya</button>
+</div>
+
+<!-- NIVEL 1 -->
+<div id="nivel1" class="hidden">
+  <h2>Adivina el Número (1-50)</h2>
+  <button onclick="volverMenu()">Volver al menú</button>
+  <input type="number" id="num" placeholder="Tu número">
+  <button onclick="comprobar()">Probar</button>
+  <p id="msg1"></p>
+</div>
+
+<!-- NIVEL 2 -->
+<div id="nivel2" class="hidden">
+  <h2>Buscaminas (6x6)</h2>
+  <button onclick="volverMenu()">Volver al menú</button>
+  <p>Haz clic en las casillas que NO tienen mina.</p>
+  <div id="minesGrid"></div>
+  <p id="msg2"></p>
+</div>
+
+<!-- NIVEL 3 -->
+<div id="nivel3" class="hidden">
+  <h2>3 en Raya</h2>
+  <button onclick="volverMenu()">Volver al menú</button>
+  <div id="tablero" style="display:grid;grid-template-columns:repeat(3,100px);gap:5px;justify-content:center;"></div>
+  <p id="msg3"></p>
+</div>
+
 <script>
 let nivel = 1;
 let secreto = Math.floor(Math.random()*50)+1;
@@ -9,7 +134,6 @@ const nivelSpan = document.getElementById("nivel");
 const btn2 = document.getElementById("btn2");
 const btn3 = document.getElementById("btn3");
 const msg1 = document.getElementById("msg1");
-const grid = document.getElementById("minesGrid");
 const msg2 = document.getElementById("msg2");
 
 function volverMenu() {
@@ -34,7 +158,6 @@ function jugar(n) {
   document.getElementById("menu").classList.add("hidden");
   document.getElementById("nivel"+n).classList.remove("hidden");
 
-  // 🔹 Reiniciar “Adivina el número” cada vez que entras
   if (n === 1) {
     secreto = Math.floor(Math.random()*50)+1;
     document.getElementById("num").value = "";
@@ -86,6 +209,7 @@ function comprobar() {
 }
 
 /* NIVEL 2 */
+const grid = document.getElementById("minesGrid");
 let mines = [];
 let revealedCount = 0;
 const size = 6;
@@ -192,4 +316,36 @@ function iniciar3Raya() {
 
   for (let i = 0; i < 9; i++) {
     const cell = document.createElement("div");
-    cell.style.width
+    cell.style.width = "100px";
+    cell.style.height = "100px";
+    cell.style.background = "#333";
+    cell.style.display = "flex";
+    cell.style.alignItems = "center";
+    cell.style.justifyContent = "center";
+    cell.style.fontSize = "40px";
+    cell.style.cursor = "pointer";
+
+    cell.onclick = () => {
+      if (celdas[i] !== "") return;
+
+      celdas[i] = turno;
+      cell.textContent = turno;
+
+      if (checkWin()) {
+        ganarXP(150);
+        document.getElementById("msg3").innerHTML = "<span class='victoria'>¡Has ganado! 🎉</span>";
+        setTimeout(()=>victoria(3), 800);
+        return;
+      }
+
+      turno = turno === "X" ? "O" : "X";
+    };
+
+    tablero.appendChild(cell);
+  }
+}
+</script>
+
+</body>
+</html>
+
