@@ -253,6 +253,12 @@ function iniciarBuscaminas() {
     cell.onclick = () => revealCell(cell);
     grid.appendChild(cell);
   }
+
+  msg2.innerHTML = "";
+  const btnWeb = document.createElement("button");
+  btnWeb.textContent = "Ir a losandeleros";
+  btnWeb.onclick = () => window.location.href = "https://losandeleros.onrender.com";
+  msg2.appendChild(btnWeb);
 }
 
 function getNeighbors(index) {
@@ -378,6 +384,7 @@ function iniciarSnake() {
   const box = 20;
   let snake = [{x: 200, y: 200}];
   let direction = null;
+  let keyPressed = null;
   let food = generarComida();
   let gameOver = false;
 
@@ -389,10 +396,14 @@ function iniciarSnake() {
   }
 
   document.onkeydown = (e) => {
-    if (e.key === "ArrowUp" || e.key === "w") direction = "UP";
-    if (e.key === "ArrowDown" || e.key === "s") direction = "DOWN";
-    if (e.key === "ArrowLeft" || e.key === "a") direction = "LEFT";
-    if (e.key === "ArrowRight" || e.key === "d") direction = "RIGHT";
+    if (["ArrowUp","w"].includes(e.key)) keyPressed = "UP";
+    if (["ArrowDown","s"].includes(e.key)) keyPressed = "DOWN";
+    if (["ArrowLeft","a"].includes(e.key)) keyPressed = "LEFT";
+    if (["ArrowRight","d"].includes(e.key)) keyPressed = "RIGHT";
+  };
+
+  document.onkeyup = () => {
+    keyPressed = null;
   };
 
   snakeInterval = setInterval(() => {
@@ -400,7 +411,7 @@ function iniciarSnake() {
 
     ctx.clearRect(0,0,400,400);
 
-    if (!direction) {
+    if (!keyPressed) {
       ctx.fillStyle = "lime";
       snake.forEach(s => ctx.fillRect(s.x, s.y, box, box));
 
@@ -408,6 +419,8 @@ function iniciarSnake() {
       ctx.fillRect(food.x, food.y, box, box);
       return;
     }
+
+    direction = keyPressed;
 
     let head = {...snake[0]};
 
