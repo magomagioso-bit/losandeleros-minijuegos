@@ -104,6 +104,11 @@
   <button onclick="jugar(2)" id="btn2" class="hidden">Nivel 2: Buscaminas</button>
   <button onclick="jugar(3)" id="btn3" class="hidden">Nivel 3: 3 en Raya</button>
   <button onclick="jugar(4)" id="btn4" class="hidden">Nivel 4: Snake</button>
+
+  <!-- ⭐ BOTÓN DE TU AMIGO EN EL MENÚ -->
+  <button onclick="window.location.href='https://losandeleros.onrender.com'">
+    Ir a losandeleros
+  </button>
 </div>
 
 <!-- NIVEL 1 -->
@@ -253,12 +258,6 @@ function iniciarBuscaminas() {
     cell.onclick = () => revealCell(cell);
     grid.appendChild(cell);
   }
-
-  msg2.innerHTML = "";
-  const btnWeb = document.createElement("button");
-  btnWeb.textContent = "Ir a losandeleros";
-  btnWeb.onclick = () => window.location.href = "https://losandeleros.onrender.com";
-  msg2.appendChild(btnWeb);
 }
 
 function getNeighbors(index) {
