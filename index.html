@@ -3,93 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Minijuegos con Niveles</title>
-<style>
-  body {
-    background: #111;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-  .hidden { display: none; }
-  button {
-    padding: 12px 25px;
-    font-size: 18px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 10px;
-    background: #ffcc00;
-    color: black;
-    transition: transform .1s;
-  }
-  button:active { transform: scale(0.95); }
-
-  #nivelBox {
-    background: #222;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    font-size: 22px;
-  }
-
-  #xpBox {
-    background: #222;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    font-size: 20px;
-    color: #00ffcc;
-  }
-
-  .victoria {
-    font-size: 28px;
-    color: #00ff88;
-    animation: pop 0.4s ease;
-  }
-
-  @keyframes pop {
-    0% { transform: scale(0.5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  /* Buscaminas */
-  #minesGrid {
-    display: grid;
-    grid-template-columns: repeat(6, 40px);
-    gap: 4px;
-    justify-content: center;
-    margin-top: 15px;
-  }
-
-  .cell {
-    width: 40px;
-    height: 40px;
-    background: #333;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-weight: bold;
-  }
-
-  .cell.revealed {
-    background: #555;
-    cursor: default;
-  }
-
-  .cell.mine {
-    background: #ff4444;
-  }
-
-  /* Snake */
-  #snakeCanvas {
-    background: #000;
-    border: 3px solid #fff;
-    margin-top: 20px;
-  }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -105,9 +19,14 @@
   <button onclick="jugar(3)" id="btn3" class="hidden">Nivel 3: 3 en Raya</button>
   <button onclick="jugar(4)" id="btn4" class="hidden">Nivel 4: Snake</button>
 
-  <!-- ⭐ BOTÓN DE TU AMIGO EN EL MENÚ -->
+  <!-- Botón de tu amigo -->
   <button onclick="window.location.href='https://losandeleros.onrender.com'">
     Ir a losandeleros
+  </button>
+
+  <!-- Botón para borrar progreso -->
+  <button onclick="localStorage.clear(); location.reload();">
+    Reiniciar progreso
   </button>
 </div>
 
@@ -133,7 +52,7 @@
 <div id="nivel3" class="hidden">
   <h2>3 en Raya</h2>
   <button onclick="volverMenu()">Volver al menú</button>
-  <div id="tablero" style="display:grid;grid-template-columns:repeat(3,100px);gap:5px;justify-content:center;"></div>
+  <div id="tablero"></div>
   <p id="msg3"></p>
 </div>
 
@@ -146,7 +65,9 @@
 </div>
 
 <script>
-/* VARIABLES GENERALES */
+/* ============================
+   VARIABLES GENERALES
+============================ */
 let nivel = 1;
 let secreto = Math.floor(Math.random()*50)+1;
 let xp = 0;
@@ -159,7 +80,33 @@ const btn2 = document.getElementById("btn2");
 const btn3 = document.getElementById("btn3");
 const btn4 = document.getElementById("btn4");
 
-/* MENÚ */
+/* ============================
+   CARGAR DATOS DE LOCALSTORAGE
+============================ */
+window.onload = () => {
+    if (localStorage.getItem("nivel")) {
+        nivel = Number(localStorage.getItem("nivel"));
+        xp = Number(localStorage.getItem("xp"));
+        victoriasBuscaminas = Number(localStorage.getItem("victoriasBuscaminas"));
+
+        nivelSpan.textContent = nivel;
+        xpSpan.textContent = xp;
+
+        if (nivel >= 2) btn2.classList.remove("hidden");
+        if (nivel >= 3) btn3.classList.remove("hidden");
+        if (nivel >= 4) btn4.classList.remove("hidden");
+    }
+};
+
+function guardarDatos() {
+    localStorage.setItem("nivel", nivel);
+    localStorage.setItem("xp", xp);
+    localStorage.setItem("victoriasBuscaminas", victoriasBuscaminas);
+}
+
+/* ============================
+   MENÚ
+============================ */
 function volverMenu() {
   document.querySelectorAll("[id^='nivel']").forEach(div => div.classList.add("hidden"));
   document.getElementById("menu").classList.remove("hidden");
@@ -168,6 +115,7 @@ function volverMenu() {
 function ganarXP(cantidad) {
   xp += cantidad;
   xpSpan.textContent = xp;
+  guardarDatos();
 }
 
 function actualizarNivel() {
@@ -175,6 +123,7 @@ function actualizarNivel() {
   if (nivel >= 2) btn2.classList.remove("hidden");
   if (nivel >= 3) btn3.classList.remove("hidden");
   if (nivel >= 4) btn4.classList.remove("hidden");
+  guardarDatos();
 }
 
 function jugar(n) {
@@ -200,8 +149,10 @@ function victoria(n) {
 
   if (n === 2) {
     victoriasBuscaminas++;
+    guardarDatos();
     if (victoriasBuscaminas >= 3) {
       victoriasBuscaminas = 0;
+      guardarDatos();
       alert("¡Has ganado 3 veces seguidas en Buscaminas!");
       volverMenu();
       return;
@@ -214,7 +165,9 @@ function victoria(n) {
   volverMenu();
 }
 
-/* NIVEL 1 */
+/* ============================
+   NIVEL 1: ADIVINA EL NÚMERO
+============================ */
 function comprobar() {
   const n = Number(document.getElementById("num").value);
 
@@ -231,7 +184,9 @@ function comprobar() {
   }
 }
 
-/* NIVEL 2: BUSCAMINAS */
+/* ============================
+   NIVEL 2: BUSCAMINAS
+============================ */
 const grid = document.getElementById("minesGrid");
 let mines = [];
 let revealedCount = 0;
@@ -295,6 +250,7 @@ function revealCell(cell) {
     cell.textContent = "💣";
     msg2.textContent = "¡BOOM!";
     victoriasBuscaminas = 0;
+    guardarDatos();
     setTimeout(() => iniciarBuscaminas(), 800);
     return;
   }
@@ -321,7 +277,9 @@ function revealCell(cell) {
   }
 }
 
-/* NIVEL 3: 3 EN RAYA */
+/* ============================
+   NIVEL 3: 3 EN RAYA
+============================ */
 function iniciar3Raya() {
   const tablero = document.getElementById("tablero");
   tablero.innerHTML = "";
@@ -343,14 +301,7 @@ function iniciar3Raya() {
 
   for (let i = 0; i < 9; i++) {
     const cell = document.createElement("div");
-    cell.style.width = "100px";
-    cell.style.height = "100px";
-    cell.style.background = "#333";
-    cell.style.display = "flex";
-    cell.style.alignItems = "center";
-    cell.style.justifyContent = "center";
-    cell.style.fontSize = "40px";
-    cell.style.cursor = "pointer";
+    cell.classList.add("tresCell");
 
     cell.onclick = () => {
       if (celdas[i] !== "") return;
@@ -371,7 +322,9 @@ function iniciar3Raya() {
   }
 }
 
-/* NIVEL 4: SNAKE */
+/* ============================
+   NIVEL 4: SNAKE
+============================ */
 let snakeInterval;
 
 function iniciarSnake() {
