@@ -7,10 +7,10 @@
 </head>
 <body>
 
-<div id="nivelBox">Nivel actual: <span id="nivel">1</span></div>
-<div id="xpBox">XP: <span id="xp">0</span></div>
+<div id="nivelBox" class="card-top">Nivel actual: <span id="nivel">1</span></div>
+<div id="xpBox" class="card-top">XP: <span id="xp">0</span></div>
 
-<div id="menu">
+<div id="menu" class="panel active">
   <h1>Minijuegos</h1>
   <p>Completa cada nivel para desbloquear el siguiente.</p>
 
@@ -29,7 +29,7 @@
 </div>
 
 <!-- NIVEL 1 -->
-<div id="nivel1" class="hidden">
+<div id="nivel1" class="panel hidden">
   <h2>Adivina el Número (1-50)</h2>
   <button onclick="volverMenu()">Volver al menú</button>
   <input type="number" id="num" placeholder="Tu número">
@@ -38,7 +38,7 @@
 </div>
 
 <!-- NIVEL 2 -->
-<div id="nivel2" class="hidden">
+<div id="nivel2" class="panel hidden">
   <h2>Buscaminas (6x6)</h2>
   <button onclick="volverMenu()">Volver al menú</button>
   <p>Haz clic en las casillas que NO tienen mina.</p>
@@ -47,7 +47,7 @@
 </div>
 
 <!-- NIVEL 3 -->
-<div id="nivel3" class="hidden">
+<div id="nivel3" class="panel hidden">
   <h2>3 en Raya</h2>
   <button onclick="volverMenu()">Volver al menú</button>
   <div id="tablero"></div>
@@ -55,7 +55,7 @@
 </div>
 
 <!-- NIVEL 4 -->
-<div id="nivel4" class="hidden">
+<div id="nivel4" class="panel hidden">
   <h2>Snake</h2>
   <button onclick="volverMenu()">Volver al menú</button>
   <canvas id="snakeCanvas" width="400" height="400"></canvas>
@@ -103,13 +103,24 @@ function guardarDatos() {
 }
 
 /* ============================
+   TRANSICIONES / PANELES
+============================ */
+function mostrarPanel(id) {
+  document.querySelectorAll(".panel").forEach(p => {
+    p.classList.add("hidden");
+    p.classList.remove("active");
+  });
+  const panel = document.getElementById(id);
+  panel.classList.remove("hidden");
+  panel.classList.add("active");
+}
+
+/* ============================
    MENÚ
 ============================ */
 function volverMenu() {
-  document.querySelectorAll("[id^='nivel']").forEach(div => div.classList.add("hidden"));
-  document.getElementById("menu").classList.remove("hidden");
+  mostrarPanel("menu");
 
-  // ⭐ SCROLL HACIA ARRIBA AL MENÚ
   setTimeout(() => {
     document.getElementById("menu").scrollIntoView({ behavior: "smooth", block: "start" });
   }, 100);
@@ -130,10 +141,7 @@ function actualizarNivel() {
 }
 
 function jugar(n) {
-  document.getElementById("menu").classList.add("hidden");
-
-  const nivelDiv = document.getElementById("nivel" + n);
-  nivelDiv.classList.remove("hidden");
+  mostrarPanel("nivel" + n);
 
   if (n === 1) {
     secreto = Math.floor(Math.random()*50)+1;
@@ -145,9 +153,8 @@ function jugar(n) {
   if (n === 3) iniciar3Raya();
   if (n === 4) iniciarSnake();
 
-  // ⭐ SCROLL HACIA ABAJO AL JUEGO
   setTimeout(() => {
-    nivelDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("nivel" + n).scrollIntoView({ behavior: "smooth", block: "start" });
   }, 100);
 }
 
@@ -419,3 +426,4 @@ function iniciarSnake() {
 
 </body>
 </html>
+
