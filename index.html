@@ -19,12 +19,10 @@
   <button onclick="jugar(3)" id="btn3" class="hidden">Nivel 3: 3 en Raya</button>
   <button onclick="jugar(4)" id="btn4" class="hidden">Nivel 4: Snake</button>
 
-  <!-- Botón de tu amigo -->
   <button onclick="window.location.href='https://losandeleros.onrender.com'">
     Ir a losandeleros
   </button>
 
-  <!-- Botón para borrar progreso -->
   <button onclick="localStorage.clear(); location.reload();">
     Reiniciar progreso
   </button>
@@ -110,6 +108,11 @@ function guardarDatos() {
 function volverMenu() {
   document.querySelectorAll("[id^='nivel']").forEach(div => div.classList.add("hidden"));
   document.getElementById("menu").classList.remove("hidden");
+
+  // ⭐ SCROLL HACIA ARRIBA AL MENÚ
+  setTimeout(() => {
+    document.getElementById("menu").scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 100);
 }
 
 function ganarXP(cantidad) {
@@ -128,7 +131,9 @@ function actualizarNivel() {
 
 function jugar(n) {
   document.getElementById("menu").classList.add("hidden");
-  document.getElementById("nivel"+n).classList.remove("hidden");
+
+  const nivelDiv = document.getElementById("nivel" + n);
+  nivelDiv.classList.remove("hidden");
 
   if (n === 1) {
     secreto = Math.floor(Math.random()*50)+1;
@@ -139,6 +144,11 @@ function jugar(n) {
   if (n === 2) iniciarBuscaminas();
   if (n === 3) iniciar3Raya();
   if (n === 4) iniciarSnake();
+
+  // ⭐ SCROLL HACIA ABAJO AL JUEGO
+  setTimeout(() => {
+    nivelDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 100);
 }
 
 function victoria(n) {
@@ -409,4 +419,3 @@ function iniciarSnake() {
 
 </body>
 </html>
-
