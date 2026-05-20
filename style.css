@@ -93,4 +93,152 @@ button:active {
   transform: scale(0.96);
 }
 
-/
+/* Inputs */
+input {
+  padding: 10px 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: 2px solid #5ad1ff;
+  background: #05060b;
+  color: #5ad1ff;
+  outline: none;
+  box-shadow: 0 0 10px rgba(90, 209, 255, 0.4);
+  margin-right: 8px;
+}
+
+input:focus {
+  box-shadow: 0 0 16px rgba(90, 209, 255, 0.8);
+}
+
+/* Mensajes de victoria */
+.victoria {
+  font-size: 28px;
+  color: #00ff88;
+  text-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+  animation: pop 0.4s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================
+   BUSCAMINAS
+============================ */
+#minesGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 50px);
+  gap: 8px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.cell {
+  width: 50px;
+  height: 50px;
+  background: #181a2b;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 20px;
+  border: 2px solid #5ad1ff;
+  transition: 0.15s;
+  box-shadow: 0 0 10px rgba(90, 209, 255, 0.4);
+}
+
+.cell:hover {
+  background: #22253a;
+  box-shadow: 0 0 16px rgba(90, 209, 255, 0.8);
+}
+
+.cell.revealed {
+  background: #2a2d45;
+  border-color: #777;
+  box-shadow: none;
+}
+
+.cell.mine {
+  background: #ff3355;
+  border-color: #ff8899;
+  box-shadow: 0 0 18px rgba(255, 51, 85, 0.9);
+}
+
+/* ============================
+   3 EN RAYA
+============================ */
+#tablero {
+  display: grid;
+  grid-template-columns: repeat(3, 110px);
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.tresCell {
+  background: #181a2b;
+  border-radius: 12px;
+  font-size: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 110px;
+  border: 2px solid #5ad1ff;
+  transition: 0.2s;
+  box-shadow: 0 0 10px rgba(90, 209, 255, 0.4);
+  cursor: pointer;
+}
+
+.tresCell:hover {
+  background: #22253a;
+  box-shadow: 0 0 18px rgba(90, 209, 255, 0.9);
+}
+
+/* ============================
+   SNAKE
+============================ */
+#snakeCanvas {
+  background: #000;
+  border: 4px solid #5ad1ff;
+  margin-top: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(90, 209, 255, 0.8);
+}
+
+/* ============================
+   RESPONSIVE
+============================ */
+@media (max-width: 600px) {
+  #minesGrid {
+    grid-template-columns: repeat(6, 40px);
+  }
+
+  .cell {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  button {
+    width: 90%;
+    font-size: 16px;
+  }
+
+  #snakeCanvas {
+    width: 300px;
+    height: 300px;
+  }
+
+  #tablero {
+    grid-template-columns: repeat(3, 90px);
+  }
+
+  .tresCell {
+    height: 90px;
+    font-size: 40px;
+  }
+}
+
