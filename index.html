@@ -179,24 +179,55 @@ function iniciarBuscaminas() {
   const grid = document.getElementById("minesGrid");
   grid.innerHTML = "";
   msg2.textContent = "";
-  const mines = new Set();
-  while (mines.size < 6) mines.add(Math.floor(Math.random()*36));
 
-  for (let i=0;i<36;i++) {
+  const size = 6;
+  const total = size * size;
+  const mines = new Set();
+
+  while (mines.size < 6) mines.add(Math.floor(Math.random() * total));
+
+  function countMinesAround(i) {
+    const x = i % size;
+    const y = Math.floor(i / size);
+    let count = 0;
+
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
+          const ni = ny * size + nx;
+          if (mines.has(ni)) count++;
+        }
+      }
+    }
+    return count;
+  }
+
+  for (let i = 0; i < total; i++) {
     const cell = document.createElement("div");
     cell.className = "cell";
+
     cell.onclick = () => {
-      if (cell.classList.contains("revealed") || cell.classList.contains("mine")) return;
+      if (cell.classList.contains("revealed")) return;
+
       if (mines.has(i)) {
         cell.classList.add("mine");
-        msg2.textContent = "¡Has perdido!";
-      } else {
-        cell.classList.add("revealed");
-        cell.textContent = "✔";
-        if (document.querySelectorAll(".cell.revealed").length >= 36 - mines.size)
-          setTimeout(()=>victoria(2),500);
+        msg2.textContent = "💥 ¡Has pisado una mina!";
+        return;
+      }
+
+      const n = countMinesAround(i);
+      cell.classList.add("revealed");
+      cell.textContent = n === 0 ? "" : n;
+
+      if (document.querySelectorAll(".cell.revealed").length >= total - mines.size) {
+        msg2.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
+        setTimeout(() => victoria(2), 800);
       }
     };
+
     grid.appendChild(cell);
   }
 }
