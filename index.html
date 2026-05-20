@@ -15,9 +15,9 @@
   <p>Completa cada nivel para desbloquear el siguiente.</p>
 
   <button onclick="jugar(1)">Nivel 1: Adivina el Número</button>
-  <button onclick="jugar(2)" id="btn2" class="hidden">Nivel 2: Buscaminas</button>
-  <button onclick="jugar(3)" id="btn3" class="hidden">Nivel 3: 3 en Raya</button>
-  <button onclick="jugar(4)" id="btn4" class="hidden">Nivel 4: Snake</button>
+  <button onclick="jugar(2)" id="btn2" class="locked">Nivel 2: Buscaminas</button>
+  <button onclick="jugar(3)" id="btn3" class="locked">Nivel 3: 3 en Raya</button>
+  <button onclick="jugar(4)" id="btn4" class="locked">Nivel 4: Snake</button>
 
   <button onclick="window.location.href='https://losandeleros.onrender.com'">
     Ir a losandeleros
@@ -29,7 +29,7 @@
 </div>
 
 <!-- NIVEL 1 -->
-<div id="nivel1" class="panel hidden">
+<div id="nivel1" class="panel">
   <h2>Adivina el Número (1-50)</h2>
   <button onclick="volverMenu()">Volver al menú</button>
   <input type="number" id="num" placeholder="Tu número">
@@ -38,7 +38,7 @@
 </div>
 
 <!-- NIVEL 2 -->
-<div id="nivel2" class="panel hidden">
+<div id="nivel2" class="panel">
   <h2>Buscaminas (6x6)</h2>
   <button onclick="volverMenu()">Volver al menú</button>
   <p>Haz clic en las casillas que NO tienen mina.</p>
@@ -47,7 +47,7 @@
 </div>
 
 <!-- NIVEL 3 -->
-<div id="nivel3" class="panel hidden">
+<div id="nivel3" class="panel">
   <h2>3 en Raya</h2>
   <button onclick="volverMenu()">Volver al menú</button>
   <div id="tablero"></div>
@@ -55,7 +55,7 @@
 </div>
 
 <!-- NIVEL 4 -->
-<div id="nivel4" class="panel hidden">
+<div id="nivel4" class="panel">
   <h2>Snake</h2>
   <button onclick="volverMenu()">Volver al menú</button>
   <canvas id="snakeCanvas" width="400" height="400"></canvas>
@@ -90,10 +90,13 @@ window.onload = () => {
         nivelSpan.textContent = nivel;
         xpSpan.textContent = xp;
 
-        if (nivel >= 2) btn2.classList.remove("hidden");
-        if (nivel >= 3) btn3.classList.remove("hidden");
-        if (nivel >= 4) btn4.classList.remove("hidden");
+        if (nivel >= 2) btn2.classList.remove("locked");
+        if (nivel >= 3) btn3.classList.remove("locked");
+        if (nivel >= 4) btn4.classList.remove("locked");
     }
+
+    ocultarTodosLosPaneles();
+    document.getElementById("menu").classList.add("active");
 };
 
 function guardarDatos() {
@@ -103,15 +106,15 @@ function guardarDatos() {
 }
 
 /* ============================
-   TRANSICIONES / PANELES
+   PANEL SYSTEM
 ============================ */
+function ocultarTodosLosPaneles() {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+}
+
 function mostrarPanel(id) {
-  document.querySelectorAll(".panel").forEach(p => {
-    p.classList.add("hidden");
-    p.classList.remove("active");
-  });
+  ocultarTodosLosPaneles();
   const panel = document.getElementById(id);
-  panel.classList.remove("hidden");
   panel.classList.add("active");
 }
 
@@ -122,7 +125,7 @@ function volverMenu() {
   mostrarPanel("menu");
 
   setTimeout(() => {
-    document.getElementById("menu").scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("menu").scrollIntoView({ behavior: "smooth" });
   }, 100);
 }
 
@@ -134,9 +137,11 @@ function ganarXP(cantidad) {
 
 function actualizarNivel() {
   nivelSpan.textContent = nivel;
-  if (nivel >= 2) btn2.classList.remove("hidden");
-  if (nivel >= 3) btn3.classList.remove("hidden");
-  if (nivel >= 4) btn4.classList.remove("hidden");
+
+  if (nivel >= 2) btn2.classList.remove("locked");
+  if (nivel >= 3) btn3.classList.remove("locked");
+  if (nivel >= 4) btn4.classList.remove("locked");
+
   guardarDatos();
 }
 
@@ -154,7 +159,7 @@ function jugar(n) {
   if (n === 4) iniciarSnake();
 
   setTimeout(() => {
-    document.getElementById("nivel" + n).scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("nivel" + n).scrollIntoView({ behavior: "smooth" });
   }, 100);
 }
 
@@ -230,6 +235,8 @@ function iniciarBuscaminas() {
     cell.onclick = () => revealCell(cell);
     grid.appendChild(cell);
   }
+
+  grid.offsetHeight; // ⭐ FIX: fuerza repintado
 }
 
 function getNeighbors(index) {
@@ -426,3 +433,4 @@ function iniciarSnake() {
 
 </body>
 </html>
+
