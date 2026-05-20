@@ -1,1 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Minijuegos con Niveles</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- TARJETAS SUPERIORES -->
+<div id="nivelBox" class="card-top">Nivel actual: <span id="nivel">1</span></div>
+<div id="xpBox" class="card-top">XP: <span id="xp">0</span></div>
+
+<!-- MENÚ PRINCIPAL -->
+<div id="menu" class="panel active">
+  <h1>Minijuegos</h1>
+
+  <button onclick="jugar(1)">Nivel 1: Adivina</button>
+  <button onclick="jugar(2)" id="btn2" class="locked">Nivel 2: Buscaminas</button>
+  <button onclick="jugar(3)" id="btn3" class="locked">Nivel 3: 3 en Raya</button>
+  <button onclick="jugar(4)" id="btn4" class="locked">Nivel 4: Snake</button>
+  <button onclick="jugar(5)" id="btn5" class="locked">Nivel 5: Flappy Bird</button>
+  <button onclick="jugar(6)" id="btn6" class="locked">Nivel 6: Dino Runner</button>
+
+  <button onclick="localStorage.clear(); location.reload();">Reiniciar progreso</button>
+</div>
+
+<!-- NIVEL 1: ADIVINA -->
+<div id="nivel1" class="panel">
+  <h2>Adivina el Número</h2>
+  <button onclick="volverMenu()">Volver</button>
+  <input type="number" id="num">
+  <button onclick="comprobar()">Probar</button>
+  <p id="msg1"></p>
+</div>
+
+<!-- NIVEL 2: BUSCAMINAS -->
+<div id="nivel2" class="panel">
+  <h2>Buscaminas</h2>
+  <button onclick="volverMenu()">Volver</button>
+  <div id="minesGrid"></div>
+  <p id="msg2"></p>
+</div>
+
+<!-- NIVEL 3: 3 EN RAYA -->
+<div id="nivel3" class="panel">
+  <h2>3 en Raya</h2>
+  <button onclick="volverMenu()">Volver</button>
+  <div id="tablero"></div>
+  <p id="msg3"></p>
+</div>
+
+<!-- NIVEL 4: SNAKE -->
+<div id="nivel4" class="panel">
+  <h2>Snake</h2>
+  <button onclick="volverMenu()">Volver</button>
+  <canvas id="snakeCanvas" width="400" height="400"></canvas>
+  <p id="msg4"></p>
+</div>
+
+<!-- NIVEL 5: FLAPPY BIRD -->
+<div id="nivel5" class="panel">
+  <h2>Flappy Bird</h2>
+  <button onclick="volverMenu()">Volver</button>
+
+  <div id="flappyGame">
+    <div id="flappyBird" class="bird-frame-1"></div>
+    <div id="pipeTop" class="pipe"></div>
+    <div id="pipeBottom" class="pipe"></div>
+    <div id="ground"></div>
+    <div id="startScreen">Pulsa para empezar</div>
+    <div id="gameOverScreen">GAME OVER</div>
+  </div>
+
+  <p>Puntuación: <span id="flappyScore">0</span></p>
+  <p id="msg5"></p>
+</div>
+
+<!-- NIVEL 6: DINO RUNNER -->
+<div id="nivel6" class="panel">
+  <h2>Dino Runner</h2>
+  <button onclick="volverMenu()">Volver</button>
+
+  <div id="dinoGame">
+    <div id="dino"></div>
+    <div id="cactus"></div>
+  </div>
+
+  <p>Puntuación: <span id="dinoScore">0</span></p>
+  <p id="msg6"></p>
+</div>
+
+<script>
+/* ============================
+   SISTEMA DE NIVELES
+============================ */
+let nivel = Number(localStorage.getItem("nivel") || 1);
+let xp = Number(localStorage.getItem("xp") || 0);
+
+document.getElementById("nivel").textContent = nivel;
+document.getElementById("xp").textContent = xp;
+
+function guardar() {
+  localStorage.setItem("nivel", nivel);
+  localStorage.setItem("xp", xp);
+}
+
+function ganarXP(c) {
+  xp += c;
+  document.getElementById("xp").textContent = xp;
+  guardar();
+}
+
+function victoria(n) {
+  ganarXP(100);
+  nivel++;
+  guardar();
+  alert("¡Nivel " + n + " completado!");
+  volverMenu();
+}
+
+/* ============================
+   PANEL SYSTEM
+============================ */
+function ocultar() {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+}
+
+function mostrar(id) {
+  ocultar();
+  document.getElementById(id).classList.add("active");
+}
+
+function volverMenu() {
+  mostrar("menu");
+  actualizarBotones();
+}
+
+function actualizarBotones() {
+  if (nivel >= 2) btn2.classList.remove("locked");
+  if (nivel >= 3) btn3.classList.remove("locked");
+  if (nivel >= 4) btn4.classList.remove("locked");
+  if (nivel >= 5) btn5.classList.remove("locked");
+  if (nivel >= 6) btn6.classList.remove("locked");
+}
+
+actualizarBotones();
+
+/* ============================
+   JUGAR
+============================ */
+function jugar(n) {
+  mostrar("nivel" + n);
+  if (n === 2) iniciarBuscaminas();
+  if (n === 3) iniciar3Raya();
+  if (n === 4) iniciarSnake();
+  if (n === 5) iniciarFlappy();
+  if (n === 6) iniciarDino();
+}
+
+/* ============================
+   NIVEL 1 – ADIVINA
+============================ */
+let secreto = Math.floor(Math.random()*50)+1;
+
+function comprobar() {
+  const n = Number(document.getElementById("num").value);
+  if (n === secreto) {
+    msg1.innerHTML = "<span class='victoria'>¡Correcto!</span>";
+    setTimeout(()=>victoria(1),800);
+  } else msg1.textContent = n < secreto ? "Más alto" : "Más bajo";
+}
+
+/* ============================
+   NIVEL 2 – BUSCAMINAS
+============================ */
+function iniciarBuscaminas() {
+  const grid = document.getElementById("minesGrid");
+  grid.innerHTML = "";
+  const mines = new Set();
+  while (mines.size < 6) mines.add(Math.floor(Math.random()*36));
+
+  for (let i=0;i<36;i++) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.onclick = () => {
+      if (mines.has(i)) {
+        cell.classList.add("mine");
+        msg2.textContent = "¡Has perdido!";
+      } else {
+        cell.classList.add("revealed");
+        cell.textContent = "✔";
+        if (document.querySelectorAll(".revealed").length >= 30)
+          setTimeout(()=>victoria(2),500);
+      }
+    };
+    grid.appendChild(cell);
+  }
+}
+
+/* ============================
+   NIVEL 3 – 3 EN RAYA
+============================ */
+function iniciar3Raya() {
+  const tablero = document.getElementById("tablero");
+  tablero.innerHTML = "";
+  let turno = "X";
+
+  for (let i=0;i<9;i++) {
+    const c = document.createElement("div");
+    c.className = "tresCell";
+    c.onclick = () => {
+      if (c.textContent) return;
+      c.textContent = turno;
+      turno = turno === "X" ? "O" : "X";
+      if (checkWin()) {
+        msg3.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
+        setTimeout(()=>victoria(3),800);
+      }
+    };
+    tablero.appendChild(c);
+  }
+
+  function checkWin() {
+    const c = [...document.querySelectorAll(".tresCell")].map(x=>x.textContent);
+    const w = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    return w.some(([a,b,c2]) => c[a] && c[a]===c[b] && c[b]===c[c2]);
+  }
+}
+
+/* ============================
+   NIVEL 4 – SNAKE
+============================ */
+let snakeInterval;
+
+function iniciarSnake() {
+  clearInterval(snakeInterval);
+  const canvas = document.getElementById("snakeCanvas");
+  const ctx = canvas.getContext("2d");
+
+  let snake = [{x:10,y:10}];
+  let dir = "RIGHT";
+  let food = {x:5,y:5};
+
+  document.onkeydown = e => {
+    if (e.key==="ArrowUp") dir="UP";
+    if (e.key==="ArrowDown") dir="DOWN";
+    if (e.key==="ArrowLeft") dir="LEFT";
+    if (e.key==="ArrowRight") dir="RIGHT";
+  };
+
+  snakeInterval = setInterval(() => {
+    let head = {...snake[0]};
+    if (dir==="UP") head.y--;
+    if (dir==="DOWN") head.y++;
+    if (dir==="LEFT") head.x--;
+    if (dir==="RIGHT") head.x++;
+
+    snake.unshift(head);
+
+    if (head.x===food.x && head.y===food.y) {
+      food = {x:Math.floor(Math.random()*20), y:Math.floor(Math.random()*20)};
+      if (snake.length>=15) {
+        clearInterval(snakeInterval);
+        msg4.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
+        setTimeout(()=>victoria(4),800);
+      }
+    } else snake.pop();
+
+    if (head.x<0||head.x>19||head.y<0||head.y>19) {
+      clearInterval(snakeInterval);
+      msg4.textContent = "Has perdido";
+    }
+
+    ctx.fillStyle="#000";
+    ctx.fillRect(0,0,400,400);
+
+    ctx.fillStyle="#0f0";
+    snake.forEach(s=>ctx.fillRect(s.x*20,s.y*20,20,20));
+
+    ctx.fillStyle="#f00";
+    ctx.fillRect(food.x*20,food.y*20,20,20);
+
+  },150);
+}
+
+/* ============================
+   NIVEL 5 – FLAPPY BIRD
+============================ */
+let flappyRunning = false;
+let flappyInterval;
+let birdFrame = 1;
+
+function iniciarFlappy() {
+  clearInterval(flappyInterval);
+
+  const game = document.getElementById("flappyGame");
+  const bird = document.getElementById("flappyBird");
+  const pipeTop = document.getElementById("pipeTop");
+  const pipeBottom = document.getElementById("pipeBottom");
+  const scoreSpan = document.getElementById("flappyScore");
+  const startScreen = document.getElementById("startScreen");
+  const gameOverScreen = document.getElementById("gameOverScreen");
+  const msg5 = document.getElementById("msg5");
+
+  let birdY = 200;
+  let velocity = 0;
+  const gravity = 0.5;
+  const jump = -8;
+
+  let pipeX = 350;
+  let gapY = 150;
+  const gapSize = 150;
+
+  let score = 0;
+  scoreSpan.textContent = "0";
+  msg5.textContent = "";
+
+  startScreen.style.display = "block";
+  gameOverScreen.style.display = "none";
+
+  function randomGap() {
+    gapY = 80 + Math.random() * 220;
+  }
+
+  function updatePipes() {
+    pipeTop.style.left = pipeX + "px";
+    pipeBottom.style.left = pipeX + "px";
+    pipeTop.style.height = gapY + "px";
+    pipeBottom.style.height = (500 - gapY - gapSize) + "px";
+  }
+
+  randomGap();
+  updatePipes();
+
+  function startGame() {
+    if (flappyRunning) return;
+    flappyRunning = true;
+    startScreen.style.display = "none";
+
+    flappyInterval = setInterval(() => {
+      velocity += gravity;
+      birdY += velocity;
+
+      bird.style.top = birdY + "px";
+
+      birdFrame = birdFrame === 1 ? 2 : 1;
+      bird.className = "bird-frame-" + birdFrame;
+
+      if (birdY + 30 > 500 - 60) return gameOver();
+
+      pipeX -= 3;
+      if (pipeX < -70) {
+        pipeX = 350;
+        randomGap();
+        updatePipes();
+        score++;
+        scoreSpan.textContent = score;
+
+        if (score >= 10) return win();
+      } else updatePipes();
+
+      const b = bird.getBoundingClientRect();
+      const t = pipeTop.getBoundingClientRect();
+      const d = pipeBottom.getBoundingClientRect();
+
+      if (colision(b, t) || colision(b, d)) return gameOver();
+
+    }, 20);
+  }
+
+  function gameOver() {
+    clearInterval(flappyInterval);
+    flappyRunning = false;
+    gameOverScreen.style.display = "block";
+  }
+
+  function win() {
+    clearInterval(flappyInterval);
+    flappyRunning = false;
+    msg5.innerHTML = "<span class='victoria'>¡Has ganado!</span>";
+    setTimeout(() => victoria(5), 800);
+  }
+
+  game.onclick = () => {
+    if (!flappyRunning) startGame();
+    velocity = jump;
+  };
+
+  document.onkeydown = e => {
+    if (e.code === "Space") {
+      if (!flappyRunning) startGame();
+      velocity = jump;
+    }
+  };
+}
+
+function colision(a, b) {
+  return !(
+    a.right < b.left ||
+    a.left > b.right ||
+    a.bottom < b.top ||
+    a.top > b.bottom
+  );
+}
+
+/* ============================
+   NIVEL 6 – DINO RUNNER
+============================ */
+let dinoInterval;
+
+function iniciarDino() {
+  clearInterval(dinoInterval);
+
+  const dino = document.getElementById("dino");
+  const cactus = document.getElementById("cactus");
+  const scoreSpan = document.getElementById("dinoScore");
+  const msg6 = document.getElementById("msg6");
+
+  let score = 0;
+  let speed = 6;
+
+  cactus.style.right = "-50px";
+  scoreSpan.textContent = "0";
+  msg6.textContent = "";
+
+  document.onkeydown = e => {
+    if (e.code === "Space" && !dino.classList.contains("jump")) {
+      dino.classList.add("jump");
+      setTimeout(()=>dino.classList.remove("jump"),600);
+    }
+  };
+
+  dinoInterval = setInterval(() => {
+    let cactusRight = parseInt(cactus.style.right);
+    cactusRight += speed;
+    cactus.style.right = cactusRight + "px";
+
+    if (cactusRight > 650) {
+      cactus.style.right = "-50px";
+      score++;
+      scoreSpan.textContent = score;
+      speed += 0.5;
+
+      if (score >= 15) {
+        clearInterval(dinoInterval);
+        msg6.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
+        setTimeout(()=>victoria(6),800);
+      }
+    }
+
+    const d = dino.getBoundingClientRect();
+    const c = cactus.getBoundingClientRect();
+
+    if (!(d.right < c.left || d.left > c.right || d.bottom < c.top || d.top > c.bottom)) {
+      clearInterval(dinoInterval);
+      msg6.textContent = "Has perdido";
+    }
+
+  }, 20);
+}
+
+</script>
+</body>
+</html>
 
