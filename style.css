@@ -8,7 +8,6 @@ body {
   text-align: center;
   padding: 20px;
   margin: 0;
-  scroll-behavior: smooth;
 }
 
 /* Tarjetas */
@@ -224,7 +223,7 @@ input {
 #startScreen { display: block; }
 
 /* ============================
-   DINO RUNNER (NIVEL 6)
+   DINO RUNNER
 ============================ */
 #dinoGame {
   position: relative;
@@ -264,4 +263,3 @@ input {
   50% { bottom: 120px; }
   100% { bottom: 0; }
 }
-
