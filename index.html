@@ -129,6 +129,7 @@ function ocultar() {
 function mostrar(id) {
   ocultar();
   document.getElementById(id).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function volverMenu() {
@@ -177,6 +178,7 @@ function comprobar() {
 function iniciarBuscaminas() {
   const grid = document.getElementById("minesGrid");
   grid.innerHTML = "";
+  msg2.textContent = "";
   const mines = new Set();
   while (mines.size < 6) mines.add(Math.floor(Math.random()*36));
 
@@ -184,13 +186,14 @@ function iniciarBuscaminas() {
     const cell = document.createElement("div");
     cell.className = "cell";
     cell.onclick = () => {
+      if (cell.classList.contains("revealed") || cell.classList.contains("mine")) return;
       if (mines.has(i)) {
         cell.classList.add("mine");
         msg2.textContent = "¡Has perdido!";
       } else {
         cell.classList.add("revealed");
         cell.textContent = "✔";
-        if (document.querySelectorAll(".revealed").length >= 30)
+        if (document.querySelectorAll(".cell.revealed").length >= 36 - mines.size)
           setTimeout(()=>victoria(2),500);
       }
     };
@@ -204,18 +207,22 @@ function iniciarBuscaminas() {
 function iniciar3Raya() {
   const tablero = document.getElementById("tablero");
   tablero.innerHTML = "";
+  msg3.textContent = "";
   let turno = "X";
 
   for (let i=0;i<9;i++) {
     const c = document.createElement("div");
     c.className = "tresCell";
     c.onclick = () => {
-      if (c.textContent) return;
+      if (c.textContent || msg3.textContent) return;
       c.textContent = turno;
-      turno = turno === "X" ? "O" : "X";
       if (checkWin()) {
         msg3.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
         setTimeout(()=>victoria(3),800);
+      } else if ([...document.querySelectorAll(".tresCell")].every(x=>x.textContent)) {
+        msg3.textContent = "Empate";
+      } else {
+        turno = turno === "X" ? "O" : "X";
       }
     };
     tablero.appendChild(c);
@@ -241,17 +248,29 @@ function iniciarSnake() {
   clearInterval(snakeInterval);
   const canvas = document.getElementById("snakeCanvas");
   const ctx = canvas.getContext("2d");
+  msg4.textContent = "";
 
   let snake = [{x:10,y:10}];
   let dir = "RIGHT";
   let food = {x:5,y:5};
+  const size = 20;
+  const cells = 20;
 
   document.onkeydown = e => {
-    if (e.key==="ArrowUp") dir="UP";
-    if (e.key==="ArrowDown") dir="DOWN";
-    if (e.key==="ArrowLeft") dir="LEFT";
-    if (e.key==="ArrowRight") dir="RIGHT";
+    if (e.key==="ArrowUp" && dir!=="DOWN") dir="UP";
+    if (e.key==="ArrowDown" && dir!=="UP") dir="DOWN";
+    if (e.key==="ArrowLeft" && dir!=="RIGHT") dir="LEFT";
+    if (e.key==="ArrowRight" && dir!=="LEFT") dir="RIGHT";
   };
+
+  function placeFood() {
+    food = {
+      x: Math.floor(Math.random()*cells),
+      y: Math.floor(Math.random()*cells)
+    };
+  }
+
+  placeFood();
 
   snakeInterval = setInterval(() => {
     let head = {...snake[0]};
@@ -260,30 +279,40 @@ function iniciarSnake() {
     if (dir==="LEFT") head.x--;
     if (dir==="RIGHT") head.x++;
 
+    if (head.x<0||head.x>=cells||head.y<0||head.y>=cells) {
+      clearInterval(snakeInterval);
+      msg4.textContent = "Has perdido";
+      return;
+    }
+
+    if (snake.some(s=>s.x===head.x && s.y===head.y)) {
+      clearInterval(snakeInterval);
+      msg4.textContent = "Has perdido";
+      return;
+    }
+
     snake.unshift(head);
 
     if (head.x===food.x && head.y===food.y) {
-      food = {x:Math.floor(Math.random()*20), y:Math.floor(Math.random()*20)};
       if (snake.length>=15) {
         clearInterval(snakeInterval);
         msg4.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
         setTimeout(()=>victoria(4),800);
+      } else {
+        placeFood();
       }
-    } else snake.pop();
-
-    if (head.x<0||head.x>19||head.y<0||head.y>19) {
-      clearInterval(snakeInterval);
-      msg4.textContent = "Has perdido";
+    } else {
+      snake.pop();
     }
 
     ctx.fillStyle="#000";
-    ctx.fillRect(0,0,400,400);
+    ctx.fillRect(0,0,canvas.width,canvas.height);
 
     ctx.fillStyle="#0f0";
-    snake.forEach(s=>ctx.fillRect(s.x*20,s.y*20,20,20));
+    snake.forEach(s=>ctx.fillRect(s.x*size,s.y*size,size,size));
 
     ctx.fillStyle="#f00";
-    ctx.fillRect(food.x*20,food.y*20,20,20);
+    ctx.fillRect(food.x*size,food.y*size,size,size);
 
   },150);
 }
@@ -436,7 +465,7 @@ function iniciarDino() {
   };
 
   dinoInterval = setInterval(() => {
-    let cactusRight = parseInt(cactus.style.right);
+    let cactusRight = parseInt(cactus.style.right || "-50");
     cactusRight += speed;
     cactus.style.right = cactusRight + "px";
 
@@ -467,3 +496,4 @@ function iniciarDino() {
 </script>
 </body>
 </html>
+
