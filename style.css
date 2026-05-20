@@ -24,7 +24,7 @@ body {
   box-shadow: 0 0 15px rgba(90, 209, 255, 0.4);
 }
 
-/* Paneles (menú y niveles) */
+/* Paneles */
 .panel {
   max-width: 800px;
   margin: 20px auto;
@@ -45,8 +45,9 @@ body {
   pointer-events: auto;
 }
 
-.hidden {
-  display: none !important;
+.locked {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 /* Títulos */
@@ -79,4 +80,17 @@ button {
   color: #222;
   font-weight: 700;
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  box-shadow: 0 6px
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+}
+
+button:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
+  filter: brightness(1.05);
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+/
