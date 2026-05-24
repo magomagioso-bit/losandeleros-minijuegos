@@ -41,7 +41,6 @@
   <div id="minesGrid"></div>
   <p id="msg2"></p>
 </div>
-
 <!-- NIVEL 3: 3 EN RAYA -->
 <div id="nivel3" class="panel">
   <h2>3 en Raya</h2>
@@ -89,7 +88,6 @@
   <p>Puntuación: <span id="dinoScore">0</span></p>
   <p id="msg6"></p>
 </div>
-
 <script>
 /* ============================
    SISTEMA DE NIVELES
@@ -129,6 +127,8 @@ function ocultar() {
 function mostrar(id) {
   ocultar();
   document.getElementById(id).classList.add("active");
+
+  /* ⭐ SCROLL SUAVE ⭐ */
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -171,7 +171,6 @@ function comprobar() {
     setTimeout(()=>victoria(1),800);
   } else msg1.textContent = n < secreto ? "Más alto" : "Más bajo";
 }
-
 /* ============================
    NIVEL 2 – BUSCAMINAS
 ============================ */
@@ -281,11 +280,17 @@ function iniciarSnake() {
   const ctx = canvas.getContext("2d");
   msg4.textContent = "";
 
-  let snake = [{x:10,y:10}];
-  let dir = "RIGHT";
-  let food = {x:5,y:5};
   const size = 20;
   const cells = 20;
+
+  /* ⭐ SNAKE CENTRADA ⭐ */
+  let snake = [{
+    x: Math.floor(cells / 2),
+    y: Math.floor(cells / 2)
+  }];
+
+  let dir = "RIGHT";
+  let food = {x:5,y:5};
 
   document.onkeydown = e => {
     if (e.key==="ArrowUp" && dir!=="DOWN") dir="UP";
@@ -347,7 +352,6 @@ function iniciarSnake() {
 
   },150);
 }
-
 /* ============================
    NIVEL 5 – FLAPPY BIRD
 ============================ */
@@ -442,7 +446,7 @@ function iniciarFlappy() {
   function win() {
     clearInterval(flappyInterval);
     flappyRunning = false;
-    msg5.innerHTML = "<span class='victoria'>¡Has ganado!</span>";
+    msg5.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
     setTimeout(() => victoria(5), 800);
   }
 
@@ -523,8 +527,6 @@ function iniciarDino() {
 
   }, 20);
 }
-
 </script>
 </body>
 </html>
-
