@@ -232,10 +232,14 @@ function reiniciarAdivina() {
 ============================ */
 
 function iniciarBuscaminas() {
-  let minesGameOver = false;
-
   const grid = document.getElementById("minesGrid");
   const diff = document.getElementById("minesDifficulty").value;
+
+  // Ajustes visuales (sin tocar tu CSS)
+  grid.style.pointerEvents = "auto";
+  grid.style.maxHeight = "300px";
+  grid.style.overflowY = "auto";
+  grid.style.gridGap = "2px";
 
   let size, mineCount;
 
@@ -244,12 +248,13 @@ function iniciarBuscaminas() {
   if (diff === "12x12") { size = 12; mineCount = 20; }
   if (diff === "16x16") { size = 16; mineCount = 40; }
 
-  grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  grid.style.gridTemplateColumns = `repeat(${size}, 30px)`;
   grid.innerHTML = "";
   msg2.textContent = "";
 
   const total = size * size;
   const mines = new Set();
+  let minesGameOver = false;
 
   while (mines.size < mineCount) mines.add(Math.floor(Math.random() * total));
 
@@ -291,7 +296,7 @@ function iniciarBuscaminas() {
     if (n > 0) {
       cell.textContent = n;
 
-      // Colores inline (sin tocar style.css)
+      // Colores inline
       const colors = ["", "blue", "green", "red", "purple", "maroon", "turquoise", "black", "gray"];
       cell.style.color = colors[n];
 
