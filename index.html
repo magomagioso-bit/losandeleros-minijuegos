@@ -177,6 +177,7 @@ function comprobar() {
 ============================ */
 function iniciarBuscaminas() {
   let minesGameOver = false;
+
   const grid = document.getElementById("minesGrid");
   grid.innerHTML = "";
   msg2.textContent = "";
@@ -195,18 +196,18 @@ function iniciarBuscaminas() {
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -1; dx <= 1; dx++) {
         if (dx === 0 && dy === 0) continue;
+
         const nx = x + dx;
         const ny = y + dy;
+
         if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
           const ni = ny * size + nx;
-         if (mines.has(i)) {
-  cell.classList.add("mine");
-  msg2.textContent = "💥 ¡Has pisado una mina!";
-  minesGameOver = true;
-  grid.style.pointerEvents = "none";
-  return;
-}
-
+          if (mines.has(ni)) count++;
+        }
+      }
+    }
+    return count;
+  }
 
   for (let i = 0; i < total; i++) {
     const cell = document.createElement("div");
@@ -219,6 +220,8 @@ function iniciarBuscaminas() {
       if (mines.has(i)) {
         cell.classList.add("mine");
         msg2.textContent = "💥 ¡Has pisado una mina!";
+        minesGameOver = true;
+        grid.style.pointerEvents = "none";
         return;
       }
 
@@ -233,44 +236,6 @@ function iniciarBuscaminas() {
     };
 
     grid.appendChild(cell);
-  }
-}
-
-/* ============================
-   NIVEL 3 – 3 EN RAYA
-============================ */
-function iniciar3Raya() {
-  const tablero = document.getElementById("tablero");
-  tablero.innerHTML = "";
-  msg3.textContent = "";
-  let turno = "X";
-
-  for (let i=0;i<9;i++) {
-    const c = document.createElement("div");
-    c.className = "tresCell";
-    c.onclick = () => {
-      if (c.textContent || msg3.textContent) return;
-      c.textContent = turno;
-      if (checkWin()) {
-        msg3.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
-        setTimeout(()=>victoria(3),800);
-      } else if ([...document.querySelectorAll(".tresCell")].every(x=>x.textContent)) {
-        msg3.textContent = "Empate";
-      } else {
-        turno = turno === "X" ? "O" : "X";
-      }
-    };
-    tablero.appendChild(c);
-  }
-
-  function checkWin() {
-    const c = [...document.querySelectorAll(".tresCell")].map(x=>x.textContent);
-    const w = [
-      [0,1,2],[3,4,5],[6,7,8],
-      [0,3,6],[1,4,7],[2,5,8],
-      [0,4,8],[2,4,6]
-    ];
-    return w.some(([a,b,c2]) => c[a] && c[a]===c[b] && c[b]===c[c2]);
   }
 }
 
