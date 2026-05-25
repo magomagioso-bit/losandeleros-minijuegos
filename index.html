@@ -126,11 +126,12 @@ function ocultar() {
 
 function mostrar(id) {
   ocultar();
-  document.getElementById(id).classList.add("active");
+  const panel = document.getElementById(id);
+  panel.classList.add("active");
 
-  /* ⭐ SCROLL SUAVE ⭐ */
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
 
 function volverMenu() {
   mostrar("menu");
@@ -175,6 +176,7 @@ function comprobar() {
    NIVEL 2 – BUSCAMINAS
 ============================ */
 function iniciarBuscaminas() {
+  let minesGameOver = false;
   const grid = document.getElementById("minesGrid");
   grid.innerHTML = "";
   msg2.textContent = "";
@@ -197,18 +199,21 @@ function iniciarBuscaminas() {
         const ny = y + dy;
         if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
           const ni = ny * size + nx;
-          if (mines.has(ni)) count++;
-        }
-      }
-    }
-    return count;
-  }
+         if (mines.has(i)) {
+  cell.classList.add("mine");
+  msg2.textContent = "💥 ¡Has pisado una mina!";
+  minesGameOver = true;
+  grid.style.pointerEvents = "none";
+  return;
+}
+
 
   for (let i = 0; i < total; i++) {
     const cell = document.createElement("div");
     cell.className = "cell";
 
     cell.onclick = () => {
+      if (minesGameOver) return;
       if (cell.classList.contains("revealed")) return;
 
       if (mines.has(i)) {
@@ -272,7 +277,97 @@ function iniciar3Raya() {
 /* ============================
    NIVEL 4 – SNAKE
 ============================ */
-let snakeInterval;
+let snakeInterval = null;
+
+function iniciarSnake() {
+  clearInterval(snakeInterval);
+
+  const canvas = document.getElementById("snakeCanvas");
+  const ctx = canvas.getContext("2d");
+  const msg4 = document.getElementById("msg4");
+  msg4.textContent = "";
+
+  const size = 20;
+  const cells = 20;
+
+  let snake = [
+    { x: Math.floor(cells / 2), y: Math.floor(cells / 2) }
+  ];
+  let dir = "RIGHT";
+  let food = { x: 5, y: 5 };
+
+  function placeFood() {
+    food = {
+      x: Math.floor(Math.random() * cells),
+      y: Math.floor(Math.random() * cells)
+    };
+  }
+
+  placeFood();
+
+  function onKey(e) {
+    if (e.key === "ArrowUp" && dir !== "DOWN") dir = "UP";
+    if (e.key === "ArrowDown" && dir !== "UP") dir = "DOWN";
+    if (e.key === "ArrowLeft" && dir !== "RIGHT") dir = "LEFT";
+    if (e.key === "ArrowRight" && dir !== "LEFT") dir = "RIGHT";
+  }
+
+  document.addEventListener("keydown", onKey);
+
+  snakeInterval = setInterval(() => {
+    let head = { ...snake[0] };
+
+    if (dir === "UP") head.y--;
+    if (dir === "DOWN") head.y++;
+    if (dir === "LEFT") head.x--;
+    if (dir === "RIGHT") head.x++;
+
+    if (head.x < 0 || head.x >= cells || head.y < 0 || head.y >= cells) {
+      gameOver();
+      return;
+    }
+
+    if (snake.some(s => s.x === head.x && s.y === head.y)) {
+      gameOver();
+      return;
+    }
+
+    snake.unshift(head);
+
+    if (head.x === food.x && head.y === food.y) {
+      if (snake.length >= 15) {
+        win();
+        return;
+      }
+      placeFood();
+    } else {
+      snake.pop();
+    }
+
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#0f0";
+    snake.forEach(s => ctx.fillRect(s.x * size, s.y * size, size, size));
+
+    ctx.fillStyle = "#f00";
+    ctx.fillRect(food.x * size, food.y * size, size, size);
+  }, 150);
+
+  function gameOver() {
+    clearInterval(snakeInterval);
+    document.removeEventListener("keydown", onKey);
+    msg4.textContent = "Has perdido";
+  }
+
+  function win() {
+    clearInterval(snakeInterval);
+    document.removeEventListener("keydown", onKey);
+    msg4.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
+    setTimeout(() => victoria(4), 800);
+  }
+}
+
 
 function iniciarSnake() {
   clearInterval(snakeInterval);
