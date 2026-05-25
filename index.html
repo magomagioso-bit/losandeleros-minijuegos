@@ -270,12 +270,14 @@ function iniciarSnake() {
 
   placeFood();
 
-  function onKey(e) {
-    if (e.key === "ArrowUp" && dir !== "DOWN") dir = "UP";
-    if (e.key === "ArrowDown" && dir !== "UP") dir = "DOWN";
-    if (e.key === "ArrowLeft" && dir !== "RIGHT") dir = "LEFT";
-    if (e.key === "ArrowRight" && dir !== "LEFT") dir = "RIGHT";
-  }
+ function onKey(e) {
+  const k = e.key.toLowerCase();
+
+  if ((k === "arrowup" || k === "w") && dir !== "DOWN") dir = "UP";
+  if ((k === "arrowdown" || k === "s") && dir !== "UP") dir = "DOWN";
+  if ((k === "arrowleft" || k === "a") && dir !== "RIGHT") dir = "LEFT";
+  if ((k === "arrowright" || k === "d") && dir !== "LEFT") dir = "RIGHT";
+}
 
   document.addEventListener("keydown", onKey);
 
@@ -436,12 +438,13 @@ function iniciarFlappy() {
     velocity = jump;
   };
 
-  document.onkeydown = e => {
-    if (e.code === "Space") {
-      if (!flappyRunning) startGame();
-      velocity = jump;
-    }
-  };
+document.addEventListener("keydown", e => {
+  if (e.code === "Space") {
+    if (!flappyRunning) startGame();
+    velocity = jump;
+  }
+});
+
 }
 
 function colision(a, b) {
@@ -472,13 +475,14 @@ function iniciarDino() {
   cactus.style.right = "-50px";
   scoreSpan.textContent = "0";
   msg6.textContent = "";
+  
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && !dino.classList.contains("jump")) {
+    dino.classList.add("jump");
+    setTimeout(()=>dino.classList.remove("jump"),600);
+  }
+});
 
-  document.onkeydown = e => {
-    if (e.code === "Space" && !dino.classList.contains("jump")) {
-      dino.classList.add("jump");
-      setTimeout(()=>dino.classList.remove("jump"),600);
-    }
-  };
 
   dinoInterval = setInterval(() => {
     let cactusRight = parseInt(cactus.style.right || "-50");
