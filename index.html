@@ -35,12 +35,18 @@
 </div>
 
 <!-- NIVEL 2: BUSCAMINAS -->
-<div id="nivel2" class="panel">
-  <h2>Buscaminas</h2>
-  <button onclick="volverMenu()">Volver</button>
-  <div id="minesGrid"></div>
-  <p id="msg2"></p>
+<div id="minesOptions">
+  <label>Elige dificultad:</label>
+  <select id="minesDifficulty" onchange="iniciarBuscaminas()">
+    <option value="6x6">Fácil (6×6, 6 minas)</option>
+    <option value="8x8">Principiante (8×8, 10 minas)</option>
+    <option value="12x12">Intermedio (12×12, 20 minas)</option>
+    <option value="16x16">Experto (16×16, 40 minas)</option>
+  </select>
 </div>
+
+<div id="minesGrid"></div>
+
 <!-- NIVEL 3: 3 EN RAYA -->
 <div id="nivel3" class="panel">
   <h2>3 en Raya</h2>
@@ -163,30 +169,87 @@ function jugar(n) {
 /* ============================
    NIVEL 1 – ADIVINA
 ============================ */
-let secreto = Math.floor(Math.random()*50)+1;
+
+let secreto;
+let intentos;
+
+function iniciarAdivina() {
+  // Generar número nuevo cada vez que entras al nivel
+  secreto = Math.floor(Math.random() * 50) + 1;
+  intentos = 0;
+
+  msg1.textContent = "Escribe un número 1–50";
+  msg1.style.color = "#fff";
+
+  const input = document.getElementById("num");
+  input.value = "";
+  input.disabled = false;
+
+  const btn = document.getElementById("btnComprobar");
+  btn.disabled = false;
+}
 
 function comprobar() {
-  const n = Number(document.getElementById("num").value);
+  const input = document.getElementById("num");
+  const n = Number(input.value);
+
+  // Validación 1–50
+  if (n < 1 || n > 50 || isNaN(n)) {
+    msg1.textContent = "Introduce un número válido entre 1 y 50";
+    msg1.style.color = "orange";
+    input.value = "";
+    return;
+  }
+
+  intentos++;
+
   if (n === secreto) {
-    msg1.innerHTML = "<span class='victoria'>¡Correcto!</span>";
-    setTimeout(()=>victoria(1),800);
-  } else msg1.textContent = n < secreto ? "Más alto" : "Más bajo";
+    msg1.innerHTML = `<span class="victoria">¡Correcto! Intentos: ${intentos}</span>`;
+    msg1.style.color = "lime";
+
+    // Bloquear input al ganar
+    input.disabled = true;
+    document.getElementById("btnComprobar").disabled = true;
+
+    setTimeout(() => victoria(1), 800);
+  } else {
+    msg1.textContent = n < secreto ? "Más alto" : "Más bajo";
+    msg1.style.color = "red";
+    input.value = "";
+  }
 }
+
+function reiniciarAdivina() {
+  iniciarAdivina();
+}
+
 /* ============================
-   NIVEL 2 – BUSCAMINAS
+   NIVEL 2 – BUSCAMINAS PRO
 ============================ */
+
 function iniciarBuscaminas() {
   let minesGameOver = false;
 
   const grid = document.getElementById("minesGrid");
+  const diff = document.getElementById("minesDifficulty").value;
+
+  let size, mineCount;
+
+  if (diff === "6x6") { size = 6; mineCount = 6; }
+  if (diff === "8x8") { size = 8; mineCount = 10; }
+  if (diff === "12x12") { size = 12; mineCount = 20; }
+  if (diff === "16x16") { size = 16; mineCount = 40; }
+
+  grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
   grid.innerHTML = "";
   msg2.textContent = "";
 
-  const size = 6;
   const total = size * size;
   const mines = new Set();
 
-  while (mines.size < 6) mines.add(Math.floor(Math.random() * total));
+  while (mines.size < mineCount) mines.add(Math.floor(Math.random() * total));
+
+  const cells = [];
 
   function countMinesAround(i) {
     const x = i % size;
@@ -209,28 +272,85 @@ function iniciarBuscaminas() {
     return count;
   }
 
+  function reveal(i) {
+    const cell = cells[i];
+    if (cell.classList.contains("revealed") || cell.classList.contains("flag")) return;
+
+    cell.classList.add("revealed");
+
+    if (mines.has(i)) {
+      cell.classList.add("mine");
+      return;
+    }
+
+    const n = countMinesAround(i);
+    if (n > 0) {
+      cell.textContent = n;
+
+      // Colores inline (sin tocar style.css)
+      const colors = ["", "blue", "green", "red", "purple", "maroon", "turquoise", "black", "gray"];
+      cell.style.color = colors[n];
+
+    } else {
+      expand(i);
+    }
+  }
+
+  function expand(i) {
+    const x = i % size;
+    const y = Math.floor(i / size);
+
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx;
+        const ny = y + dy;
+
+        if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
+          const ni = ny * size + nx;
+          if (!cells[ni].classList.contains("revealed")) reveal(ni);
+        }
+      }
+    }
+  }
+
+  function showAllMines() {
+    mines.forEach(i => {
+      cells[i].classList.add("mine");
+    });
+  }
+
   for (let i = 0; i < total; i++) {
     const cell = document.createElement("div");
     cell.className = "cell";
+    cells.push(cell);
 
-    cell.onclick = () => {
+    // Clic derecho → bandera
+    cell.oncontextmenu = e => {
+      e.preventDefault();
       if (minesGameOver) return;
       if (cell.classList.contains("revealed")) return;
+      cell.classList.toggle("flag");
+    };
+
+    // Clic izquierdo → revelar
+    cell.onclick = () => {
+      if (minesGameOver) return;
+      if (cell.classList.contains("flag")) return;
 
       if (mines.has(i)) {
-        cell.classList.add("mine");
-        msg2.textContent = "💥 ¡Has pisado una mina!";
         minesGameOver = true;
+        showAllMines();
+        msg2.textContent = "💥 ¡Has pisado una mina!";
         grid.style.pointerEvents = "none";
         return;
       }
 
-      const n = countMinesAround(i);
-      cell.classList.add("revealed");
-      cell.textContent = n === 0 ? "" : n;
+      reveal(i);
 
-      if (document.querySelectorAll(".cell.revealed").length >= total - mines.size) {
+      const revealed = document.querySelectorAll(".cell.revealed").length;
+      if (revealed >= total - mineCount) {
         msg2.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
+        grid.style.pointerEvents = "none";
         setTimeout(() => victoria(2), 800);
       }
     };
@@ -238,6 +358,7 @@ function iniciarBuscaminas() {
     grid.appendChild(cell);
   }
 }
+
 
 /* ============================
    NIVEL 4 – SNAKE
@@ -420,13 +541,15 @@ function iniciarFlappy() {
     }, 20);
   }
 
-  function gameOver() {
+  function gameOver()  {
+    document.removeEventListener("keydown", flappyKey);
     clearInterval(flappyInterval);
     flappyRunning = false;
     gameOverScreen.style.display = "block";
   }
 
   function win() {
+   document.removeEventListener("keydown", flappyKey);
     clearInterval(flappyInterval);
     flappyRunning = false;
     msg5.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
@@ -438,12 +561,15 @@ function iniciarFlappy() {
     velocity = jump;
   };
 
-document.addEventListener("keydown", e => {
+function flappyKey(e) {
   if (e.code === "Space") {
     if (!flappyRunning) startGame();
     velocity = jump;
   }
-});
+}
+
+document.addEventListener("keydown", flappyKey);
+
 
 }
 
