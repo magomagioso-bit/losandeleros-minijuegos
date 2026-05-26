@@ -51,33 +51,36 @@
 
 <p id="msg2"></p>
 
-<!-- NIVEL 3: 3 EN RAYA -->
-<div id="nivel3" class="panel">
-  <h2>3 en Raya</h2>
-  <button onclick="volverMenu()">Volver</button>
-  <div id="tablero"></div>
-  <p id="msg3"></p>
-</div>
-<label>Dificultad IA:</label>
-<select id="iaMode" onchange="iniciarTresEnRaya()">
-  <option value="none">2 Jugadores</option>
-  <option value="easy">IA Fácil</option>
-  <option value="hard">IA Difícil</option>
-</select>
+<!-- NIVEL 3 - 3 EN RAYA -->
 
-<div id="tablero"></div>
-<p id="msg3"></p>
-<select id="iaMode" onchange="iniciarTresEnRaya()">
-  <option value="none">2 Jugadores</option>
-  <option value="easy">IA Fácil</option>
-  <option value="medium">IA Media</option>
-  <option value="aggressive">IA Agresiva</option>
-  <option value="hard">IA Difícil</option>
-</select>
+<div class="panel" id="nivel3">
+  <div class="card-top">🎮 Nivel 3 – 3 en Raya</div>
+
+  <p>Selecciona el modo de juego:</p>
+
+  <select id="iaMode" onchange="iniciarTresEnRaya()">
+    <option value="none">2 Jugadores</option>
+    <option value="easy">IA Fácil</option>
+    <option value="medium">IA Media</option>
+    <option value="aggressive">IA Agresiva</option>
+    <option value="hard">IA Difícil</option>
+  </select>
+
+  <p id="torneoScore">Torneo: Jugador 0 – IA 0</p>
+
+  <div id="tablero"></div>
+
+  <p id="msg3"></p>
+
+  <button onclick="iniciarTresEnRaya()">Reiniciar Partida</button>
+</div>
+
+<!-- SONIDOS -->
 <audio id="sndClick" src="click.mp3"></audio>
 <audio id="sndWin" src="win.mp3"></audio>
 <audio id="sndLose" src="lose.mp3"></audio>
 <audio id="sndDraw" src="draw.mp3"></audio>
+
 
 <!-- NIVEL 4: SNAKE -->
 <div id="nivel4" class="panel">
