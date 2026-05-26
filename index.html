@@ -74,6 +74,10 @@
   <option value="aggressive">IA Agresiva</option>
   <option value="hard">IA Difícil</option>
 </select>
+<audio id="sndClick" src="click.mp3"></audio>
+<audio id="sndWin" src="win.mp3"></audio>
+<audio id="sndLose" src="lose.mp3"></audio>
+<audio id="sndDraw" src="draw.mp3"></audio>
 
 <!-- NIVEL 4: SNAKE -->
 <div id="nivel4" class="panel">
@@ -371,6 +375,17 @@ let tableroTres = [];
 let turno = "X";
 let juegoTerminado = false;
 
+let scoreJugador = 0;
+let scoreIA = 0;
+let partidas = 0;
+
+function actualizarMarcador() {
+  const marcador = document.getElementById("torneoScore");
+  if (marcador) {
+    marcador.textContent = `Torneo: Jugador ${scoreJugador} – IA ${scoreIA}`;
+  }
+}
+
 function iniciarTresEnRaya() {
   const tablero = document.getElementById("tablero");
   const msg = document.getElementById("msg3");
@@ -402,6 +417,13 @@ function jugar(i) {
   if (comprobarGanador()) {
     document.getElementById("msg3").textContent = `🎉 ¡Ganó ${turno}!`;
     juegoTerminado = true;
+
+    if (turno === "X") scoreJugador++;
+    else scoreIA++;
+
+    partidas++;
+    actualizarMarcador();
+
     setTimeout(() => victoria(3), 800);
     return;
   }
@@ -409,6 +431,12 @@ function jugar(i) {
   if (tableroTres.every(c => c !== "")) {
     document.getElementById("msg3").textContent = "🤝 ¡Empate!";
     juegoTerminado = true;
+
+    scoreJugador += 0.5;
+    scoreIA += 0.5;
+    partidas++;
+    actualizarMarcador();
+
     return;
   }
 
@@ -444,15 +472,12 @@ function iaFacil() {
    IA MEDIA – BLOQUEA Y GANA
 ============================ */
 function iaMedia() {
-  // 1. Si puede ganar, gana
   const ganar = buscarJugada("O");
   if (ganar !== null) return jugar(ganar);
 
-  // 2. Si el jugador puede ganar, bloquea
   const bloquear = buscarJugada("X");
   if (bloquear !== null) return jugar(bloquear);
 
-  // 3. Si no, juega aleatorio
   iaFacil();
 }
 
@@ -477,18 +502,14 @@ function buscarJugada(jugador) {
    IA AGRESIVA – PRIORIZA GANAR
 ============================ */
 function iaAgresiva() {
-  // 1. Si puede ganar, gana
   const ganar = buscarJugada("O");
   if (ganar !== null) return jugar(ganar);
 
-  // 2. Juega en el centro si está libre
   if (tableroTres[4] === "") return jugar(4);
 
-  // 3. Juega en una esquina libre
   const esquinas = [0,2,6,8].filter(i => tableroTres[i] === "");
   if (esquinas.length > 0) return jugar(esquinas[0]);
 
-  // 4. Si no, juega aleatorio
   iaFacil();
 }
 
@@ -540,11 +561,19 @@ function comprobarGanadorEstado(tab, jugador) {
     [0,4,8], [2,4,6]
   ];
 
-  return lineas.some(([a,b,c]) =>
-    tab[a] === jugador &&
-    tab[b] === jugador &&
-    tab[c] === jugador
-  );
+  for (let [a,b,c] of lineas) {
+    if (tab[a] === jugador && tab[b] === jugador && tab[c] === jugador) {
+      marcarVictoria(a,b,c);
+      return true;
+    }
+  }
+  return false;
+}
+
+function marcarVictoria(a, b, c) {
+  document.querySelector(`.tresCell[data-index='${a}']`).classList.add("winCell");
+  document.querySelector(`.tresCell[data-index='${b}']`).classList.add("winCell");
+  document.querySelector(`.tresCell[data-index='${c}']`).classList.add("winCell");
 }
 
 
