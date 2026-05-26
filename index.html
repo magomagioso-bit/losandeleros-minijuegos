@@ -67,6 +67,13 @@
 
 <div id="tablero"></div>
 <p id="msg3"></p>
+<select id="iaMode" onchange="iniciarTresEnRaya()">
+  <option value="none">2 Jugadores</option>
+  <option value="easy">IA Fácil</option>
+  <option value="medium">IA Media</option>
+  <option value="aggressive">IA Agresiva</option>
+  <option value="hard">IA Difícil</option>
+</select>
 
 <!-- NIVEL 4: SNAKE -->
 <div id="nivel4" class="panel">
@@ -415,13 +422,15 @@ function jugar(i) {
 }
 
 function turnoIA(modo) {
-  if (modo === "easy") {
-    iaFacil();
-  } else if (modo === "hard") {
-    iaDificil();
-  }
+  if (modo === "easy") iaFacil();
+  else if (modo === "medium") iaMedia();
+  else if (modo === "aggressive") iaAgresiva();
+  else if (modo === "hard") iaDificil();
 }
 
+/* ============================
+   IA FÁCIL – ALEATORIA
+============================ */
 function iaFacil() {
   const libres = tableroTres
     .map((v, i) => v === "" ? i : null)
@@ -431,6 +440,61 @@ function iaFacil() {
   jugar(jugada);
 }
 
+/* ============================
+   IA MEDIA – BLOQUEA Y GANA
+============================ */
+function iaMedia() {
+  // 1. Si puede ganar, gana
+  const ganar = buscarJugada("O");
+  if (ganar !== null) return jugar(ganar);
+
+  // 2. Si el jugador puede ganar, bloquea
+  const bloquear = buscarJugada("X");
+  if (bloquear !== null) return jugar(bloquear);
+
+  // 3. Si no, juega aleatorio
+  iaFacil();
+}
+
+function buscarJugada(jugador) {
+  const lineas = [
+    [0,1,2], [3,4,5], [6,7,8],
+    [0,3,6], [1,4,7], [2,5,8],
+    [0,4,8], [2,4,6]
+  ];
+
+  for (let [a,b,c] of lineas) {
+    const linea = [tableroTres[a], tableroTres[b], tableroTres[c]];
+    if (linea.filter(v => v === jugador).length === 2 &&
+        linea.includes("")) {
+      return [a,b,c][linea.indexOf("")];
+    }
+  }
+  return null;
+}
+
+/* ============================
+   IA AGRESIVA – PRIORIZA GANAR
+============================ */
+function iaAgresiva() {
+  // 1. Si puede ganar, gana
+  const ganar = buscarJugada("O");
+  if (ganar !== null) return jugar(ganar);
+
+  // 2. Juega en el centro si está libre
+  if (tableroTres[4] === "") return jugar(4);
+
+  // 3. Juega en una esquina libre
+  const esquinas = [0,2,6,8].filter(i => tableroTres[i] === "");
+  if (esquinas.length > 0) return jugar(esquinas[0]);
+
+  // 4. Si no, juega aleatorio
+  iaFacil();
+}
+
+/* ============================
+   IA DIFÍCIL – MINIMAX PERFECTO
+============================ */
 function iaDificil() {
   const jugada = minimax(tableroTres, "O").index;
   jugar(jugada);
@@ -462,6 +526,9 @@ function minimax(tablero, jugador) {
   }
 }
 
+/* ============================
+   COMPROBAR GANADOR
+============================ */
 function comprobarGanador() {
   return comprobarGanadorEstado(tableroTres, turno);
 }
@@ -479,6 +546,7 @@ function comprobarGanadorEstado(tab, jugador) {
     tab[c] === jugador
   );
 }
+
 
 
 /* ============================
