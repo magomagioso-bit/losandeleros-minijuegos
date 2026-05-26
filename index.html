@@ -58,6 +58,15 @@
   <div id="tablero"></div>
   <p id="msg3"></p>
 </div>
+<label>Dificultad IA:</label>
+<select id="iaMode" onchange="iniciarTresEnRaya()">
+  <option value="none">2 Jugadores</option>
+  <option value="easy">IA Fácil</option>
+  <option value="hard">IA Difícil</option>
+</select>
+
+<div id="tablero"></div>
+<p id="msg3"></p>
 
 <!-- NIVEL 4: SNAKE -->
 <div id="nivel4" class="panel">
@@ -345,6 +354,130 @@ function iniciarBuscaminas() {
 
     grid.appendChild(cell);
   }
+}
+
+/* ============================
+   NIVEL 3 – 3 EN RAYA CON IA
+============================ */
+
+let tableroTres = [];
+let turno = "X";
+let juegoTerminado = false;
+
+function iniciarTresEnRaya() {
+  const tablero = document.getElementById("tablero");
+  const msg = document.getElementById("msg3");
+
+  tablero.innerHTML = "";
+  msg.textContent = "";
+  tableroTres = ["", "", "", "", "", "", "", "", ""];
+  turno = "X";
+  juegoTerminado = false;
+
+  for (let i = 0; i < 9; i++) {
+    const casilla = document.createElement("div");
+    casilla.className = "tresCell";
+    casilla.dataset.index = i;
+
+    casilla.onclick = () => jugar(i);
+
+    tablero.appendChild(casilla);
+  }
+}
+
+function jugar(i) {
+  if (juegoTerminado) return;
+  if (tableroTres[i] !== "") return;
+
+  tableroTres[i] = turno;
+  document.querySelector(`.tresCell[data-index='${i}']`).textContent = turno;
+
+  if (comprobarGanador()) {
+    document.getElementById("msg3").textContent = `🎉 ¡Ganó ${turno}!`;
+    juegoTerminado = true;
+    setTimeout(() => victoria(3), 800);
+    return;
+  }
+
+  if (tableroTres.every(c => c !== "")) {
+    document.getElementById("msg3").textContent = "🤝 ¡Empate!";
+    juegoTerminado = true;
+    return;
+  }
+
+  turno = turno === "X" ? "O" : "X";
+
+  const modo = document.getElementById("iaMode").value;
+
+  if (turno === "O" && modo !== "none") {
+    setTimeout(() => turnoIA(modo), 300);
+  }
+}
+
+function turnoIA(modo) {
+  if (modo === "easy") {
+    iaFacil();
+  } else if (modo === "hard") {
+    iaDificil();
+  }
+}
+
+function iaFacil() {
+  const libres = tableroTres
+    .map((v, i) => v === "" ? i : null)
+    .filter(v => v !== null);
+
+  const jugada = libres[Math.floor(Math.random() * libres.length)];
+  jugar(jugada);
+}
+
+function iaDificil() {
+  const jugada = minimax(tableroTres, "O").index;
+  jugar(jugada);
+}
+
+function minimax(tablero, jugador) {
+  const libres = tablero
+    .map((v, i) => v === "" ? i : null)
+    .filter(v => v !== null);
+
+  if (comprobarGanadorEstado(tablero, "X")) return { score: -10 };
+  if (comprobarGanadorEstado(tablero, "O")) return { score: 10 };
+  if (libres.length === 0) return { score: 0 };
+
+  const movimientos = [];
+
+  for (let i of libres) {
+    const copia = [...tablero];
+    copia[i] = jugador;
+
+    const resultado = minimax(copia, jugador === "O" ? "X" : "O");
+    movimientos.push({ index: i, score: resultado.score });
+  }
+
+  if (jugador === "O") {
+    return movimientos.reduce((a, b) => a.score > b.score ? a : b);
+  } else {
+    return movimientos.reduce((a, b) => a.score < b.score ? a : b);
+  }
+}
+
+function comprobarGanador() {
+  return comprobarGanadorEstado(tableroTres, turno);
+}
+
+function comprobarGanadorEstado(tab, jugador) {
+  const lineas = [
+    [0,1,2], [3,4,5], [6,7,8],
+    [0,3,6], [1,4,7], [2,5,8],
+    [0,4,8], [2,4,6]
+  ];
+
+  return lineas.some(([a,b,c]) =>
+    tab[a] === jugador &&
+    tab[b] === jugador &&
+    tab[c] === jugador
+  );
 }
 
 
