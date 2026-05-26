@@ -174,58 +174,38 @@ function jugar(n) {
    NIVEL 1 – ADIVINA
 ============================ */
 
-let secreto;
+let numeroSecreto;
 let intentos;
 
 function iniciarAdivina() {
-  // Generar número nuevo cada vez que entras al nivel
-  secreto = Math.floor(Math.random() * 50) + 1;
+  numeroSecreto = Math.floor(Math.random() * 100) + 1; 
   intentos = 0;
-
-  msg1.textContent = "Escribe un número 1–50";
-  msg1.style.color = "#fff";
-
-  const input = document.getElementById("num");
-  input.value = "";
-  input.disabled = false;
-
-  const btn = document.getElementById("btnComprobar");
-  btn.disabled = false;
+  document.getElementById("msg1").textContent = "He pensado un número del 1 al 100.";
 }
 
-function comprobar() {
-  const input = document.getElementById("num");
-  const n = Number(input.value);
+function comprobarNumero() {
+  const n = parseInt(document.getElementById("numInput").value);
+  const msg = document.getElementById("msg1");
 
-  // Validación 1–50
-  if (n < 1 || n > 50 || isNaN(n)) {
-    msg1.textContent = "Introduce un número válido entre 1 y 50";
-    msg1.style.color = "orange";
-    input.value = "";
+  if (isNaN(n) || n < 1 || n > 100) {
+    msg.textContent = "Introduce un número entre 1 y 100.";
     return;
   }
 
   intentos++;
 
-  if (n === secreto) {
-    msg1.innerHTML = `<span class="victoria">¡Correcto! Intentos: ${intentos}</span>`;
-    msg1.style.color = "lime";
-
-    // Bloquear input al ganar
-    input.disabled = true;
-    document.getElementById("btnComprobar").disabled = true;
-
+  if (n === numeroSecreto) {
+    msg.textContent = `🎉 ¡Correcto! Lo adivinaste en ${intentos} intentos.`;
     setTimeout(() => victoria(1), 800);
-  } else {
-    msg1.textContent = n < secreto ? "Más alto" : "Más bajo";
-    msg1.style.color = "red";
-    input.value = "";
+  } 
+  else if (n < numeroSecreto) {
+    msg.textContent = "Más alto ⬆️";
+  } 
+  else {
+    msg.textContent = "Más bajo ⬇️";
   }
 }
 
-function reiniciarAdivina() {
-  iniciarAdivina();
-}
 
 /* ============================
    NIVEL 2 – BUSCAMINAS PRO
@@ -239,7 +219,7 @@ function iniciarBuscaminas() {
   grid.style.pointerEvents = "auto";
   grid.style.maxHeight = "300px";
   grid.style.overflowY = "auto";
-  grid.style.gridGap = "2px";
+  grid.style.gridGap = "8px";
 
   let size, mineCount;
 
@@ -248,7 +228,7 @@ function iniciarBuscaminas() {
   if (diff === "12x12") { size = 12; mineCount = 20; }
   if (diff === "16x16") { size = 16; mineCount = 40; }
 
-  grid.style.gridTemplateColumns = `repeat(${size}, 30px)`;
+  grid.style.gridTemplateColumns = `repeat(${size}, 50px)`;
   grid.innerHTML = "";
   msg2.textContent = "";
 
@@ -296,7 +276,6 @@ function iniciarBuscaminas() {
     if (n > 0) {
       cell.textContent = n;
 
-      // Colores inline
       const colors = ["", "blue", "green", "red", "purple", "maroon", "turquoise", "black", "gray"];
       cell.style.color = colors[n];
 
