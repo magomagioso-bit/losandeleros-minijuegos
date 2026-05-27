@@ -31,8 +31,10 @@
 <div id="nivel1" class="panel">
   <h2>Adivina el Número</h2>
   <button onclick="volverMenu()">Volver</button>
+
   <input type="number" id="num">
-  <button onclick="comprobar()">Probar</button>
+  <button onclick="comprobarNumero()">Probar</button>
+
   <p id="msg1"></p>
 </div>
   
@@ -196,6 +198,11 @@ actualizarBotones();
 ============================ */
 function jugar(n) {
   mostrar("nivel" + n);
+  function mostrarNivel(n) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("nivel" + n).classList.add("active");
+
+  if (n === 1) iniciarAdivina();
   if (n === 2) iniciarBuscaminas();
   if (n === 3) iniciar3Raya();
   if (n === 4) iniciarSnake();
@@ -206,18 +213,17 @@ function jugar(n) {
 /* ============================
    NIVEL 1 – ADIVINA
 ============================ */
-
 let numeroSecreto;
 let intentos;
 
 function iniciarAdivina() {
-  numeroSecreto = Math.floor(Math.random() * 100) + 1; 
+  numeroSecreto = Math.floor(Math.random() * 100) + 1;
   intentos = 0;
   document.getElementById("msg1").textContent = "He pensado un número del 1 al 100.";
 }
 
 function comprobarNumero() {
-  const n = parseInt(document.getElementById("numInput").value);
+  const n = parseInt(document.getElementById("num").value);
   const msg = document.getElementById("msg1");
 
   if (isNaN(n) || n < 1 || n > 100) {
@@ -238,7 +244,6 @@ function comprobarNumero() {
     msg.textContent = "Más bajo ⬇️";
   }
 }
-
 
 /* ============================
    NIVEL 2 – BUSCAMINAS PRO
