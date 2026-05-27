@@ -108,7 +108,7 @@
   <p id="msg5"></p>
 </div>
 
-<!-- NIVEL 6: DINO RUNNER -->
+<!-- NIVEL 6 - DINO RUNER -->
 <div id="nivel6" class="panel">
   <h2>Dino Runner</h2>
   <button onclick="volverMenu()">Volver</button>
@@ -120,8 +120,10 @@
 
   <p>Puntuación: <span id="dinoScore">0</span></p>
   <p id="msg6"></p>
+
+  <button onclick="iniciarDino()">Reiniciar</button>
 </div>
-<script>
+
 /* ============================
    SISTEMA DE NIVELES
 ============================ */
@@ -806,7 +808,9 @@ function colision(a, b) {
 /* ============================
    NIVEL 6 – DINO RUNNER
 ============================ */
+
 let dinoInterval;
+let dinoListenerAdded = false;
 
 function iniciarDino() {
   clearInterval(dinoInterval);
@@ -822,43 +826,58 @@ function iniciarDino() {
   cactus.style.right = "-50px";
   scoreSpan.textContent = "0";
   msg6.textContent = "";
-  
-document.addEventListener("keydown", e => {
-  if (e.code === "Space" && !dino.classList.contains("jump")) {
-    dino.classList.add("jump");
-    setTimeout(()=>dino.classList.remove("jump"),600);
-  }
-});
 
+  // Evitar añadir el listener varias veces
+  if (!dinoListenerAdded) {
+    document.addEventListener("keydown", e => {
+      if (e.code === "Space" && !dino.classList.contains("jump")) {
+        dino.classList.add("jump");
+        setTimeout(() => dino.classList.remove("jump"), 600);
+      }
+    });
+    dinoListenerAdded = true;
+  }
 
   dinoInterval = setInterval(() => {
+
+    // Movimiento del cactus
     let cactusRight = parseInt(cactus.style.right || "-50");
     cactusRight += speed;
     cactus.style.right = cactusRight + "px";
 
+    // Reinicio del cactus
     if (cactusRight > 650) {
       cactus.style.right = "-50px";
       score++;
       scoreSpan.textContent = score;
       speed += 0.5;
 
+      // Victoria
       if (score >= 15) {
         clearInterval(dinoInterval);
         msg6.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
-        setTimeout(()=>victoria(6),800);
+        setTimeout(() => victoria(6), 800);
       }
     }
 
+    // Colisión
     const d = dino.getBoundingClientRect();
     const c = cactus.getBoundingClientRect();
 
-    if (!(d.right < c.left || d.left > c.right || d.bottom < c.top || d.top > c.bottom)) {
+    const choque =
+      !(d.right < c.left ||
+        d.left > c.right ||
+        d.bottom < c.top ||
+        d.top > c.bottom);
+
+    if (choque) {
       clearInterval(dinoInterval);
       msg6.textContent = "Has perdido";
     }
 
   }, 20);
 }
+
 </script>
 </body>
 </html>
