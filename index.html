@@ -15,12 +15,13 @@
 <div id="menu" class="panel active">
   <h1>Minijuegos</h1>
 
-  <button onclick="jugar(1)">Nivel 1: Adivina</button>
-  <button onclick="jugar(2)" id="btn2" class="locked">Nivel 2: Buscaminas</button>
-  <button onclick="jugar(3)" id="btn3" class="locked">Nivel 3: 3 en Raya</button>
-  <button onclick="jugar(4)" id="btn4" class="locked">Nivel 4: Snake</button>
-  <button onclick="jugar(5)" id="btn5" class="locked">Nivel 5: Flappy Bird</button>
-  <button onclick="jugar(6)" id="btn6" class="locked">Nivel 6: Dino Runner</button>
+ <button onclick="mostrarNivel(1)">Nivel 1: Adivina</button>
+<button onclick="mostrarNivel(2)" id="btn2" class="locked">Nivel 2: Buscaminas</button>
+<button onclick="mostrarNivel(3)" id="btn3" class="locked">Nivel 3: 3 en Raya</button>
+<button onclick="mostrarNivel(4)" id="btn4" class="locked">Nivel 4: Snake</button>
+<button onclick="mostrarNivel(5)" id="btn5" class="locked">Nivel 5: Flappy Bird</button>
+<button onclick="mostrarNivel(6)" id="btn6" class="locked">Nivel 6: Dino Runner</button>
+
 
   <button onclick="localStorage.clear(); location.reload();">Reiniciar progreso</button>
 </div>
@@ -35,21 +36,26 @@
 </div>
   
 <!-- NIVEL 2: BUSCAMINAS -->
-<h2>Nivel 2 – Buscaminas</h2>
+<div id="nivel2" class="panel">
+  <h2>Nivel 2 – Buscaminas</h2>
 
-<div id="minesOptions">
-  <label>Elige dificultad:</label>
-  <select id="minesDifficulty" onchange="iniciarBuscaminas()">
-    <option value="6x6">Fácil (6×6, 6 minas)</option>
-    <option value="8x8">Principiante (8×8, 10 minas)</option>
-    <option value="12x12">Intermedio (12×12, 20 minas)</option>
-    <option value="16x16">Experto (16×16, 40 minas)</option>
-  </select>
+  <button onclick="volverMenu()">Volver</button>
+
+  <div id="minesOptions">
+    <label>Elige dificultad:</label>
+    <select id="minesDifficulty" onchange="iniciarBuscaminas()">
+      <option value="6x6">Fácil (6×6, 6 minas)</option>
+      <option value="8x8">Principiante (8×8, 10 minas)</option>
+      <option value="12x12">Intermedio (12×12, 20 minas)</option>
+      <option value="16x16">Experto (16×16, 40 minas)</option>
+    </select>
+  </div>
+
+  <div id="minesGrid"></div>
+
+  <p id="msg2"></p>
 </div>
 
-<div id="minesGrid"></div>
-
-<p id="msg2"></p>
 
 <!-- NIVEL 3 - 3 EN RAYA -->
 
