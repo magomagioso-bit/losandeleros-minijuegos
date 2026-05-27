@@ -4,16 +4,6 @@
 <meta charset="UTF-8">
 <title>Minijuegos con Niveles</title>
 <link rel="stylesheet" href="style.css">
-<script>
-function mostrarNivel(n) {
-  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-  document.getElementById("nivel" + n).classList.add("active");
-}
-
-function volverMenu() {
-  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-  document.getElementById("menu").classList.add("active");
-}
 </script>
 </head>
 <body>
@@ -69,8 +59,9 @@ function volverMenu() {
 
 
 <!-- NIVEL 3 - 3 EN RAYA -->
-
 <div class="panel" id="nivel3">
+  <button onclick="volverMenu()">Volver</button>
+
   <div class="card-top">🎮 Nivel 3 – 3 en Raya</div>
 
   <p>Selecciona el modo de juego:</p>
@@ -91,7 +82,7 @@ function volverMenu() {
 
   <button onclick="iniciarTresEnRaya()">Reiniciar Partida</button>
 </div>
-
+  
 <!-- SONIDOS -->
 <audio id="sndClick" src="click.mp3"></audio>
 <audio id="sndWin" src="win.mp3"></audio>
@@ -894,6 +885,17 @@ function iniciarDino() {
 
   }, 20);
 }
+<script>
+function mostrarNivel(n) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("nivel" + n).classList.add("active");
+}
+
+function volverMenu() {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("menu").classList.add("active");
+}
+</script>
 
 </script>
 </body>
