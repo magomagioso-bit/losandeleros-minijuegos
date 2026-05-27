@@ -241,72 +241,41 @@ input {
    NIVEL 6 – DINO RUNNER
 ============================ */
 
-let dinoInterval;
-let dinoListenerAdded = false;
-
-function iniciarDino() {
-  clearInterval(dinoInterval);
-
-  const dino = document.getElementById("dino");
-  const cactus = document.getElementById("cactus");
-  const scoreSpan = document.getElementById("dinoScore");
-  const msg6 = document.getElementById("msg6");
-
-  let score = 0;
-  let speed = 6;
-
-  cactus.style.right = "-50px";
-  scoreSpan.textContent = "0";
-  msg6.textContent = "";
-
-  // Evitar añadir el listener varias veces
-  if (!dinoListenerAdded) {
-    document.addEventListener("keydown", e => {
-      if (e.code === "Space" && !dino.classList.contains("jump")) {
-        dino.classList.add("jump");
-        setTimeout(() => dino.classList.remove("jump"), 600);
-      }
-    });
-    dinoListenerAdded = true;
-  }
-
-  dinoInterval = setInterval(() => {
-
-    // Movimiento del cactus
-    let cactusRight = parseInt(cactus.style.right || "-50");
-    cactusRight += speed;
-    cactus.style.right = cactusRight + "px";
-
-    // Reinicio del cactus
-    if (cactusRight > 650) {
-      cactus.style.right = "-50px";
-      score++;
-      scoreSpan.textContent = score;
-      speed += 0.5;
-
-      // Victoria
-      if (score >= 15) {
-        clearInterval(dinoInterval);
-        msg6.innerHTML = "<span class='victoria'>¡Ganaste!</span>";
-        setTimeout(() => victoria(6), 800);
-      }
-    }
-
-    // Colisión
-    const d = dino.getBoundingClientRect();
-    const c = cactus.getBoundingClientRect();
-
-    const choque =
-      !(d.right < c.left ||
-        d.left > c.right ||
-        d.bottom < c.top ||
-        d.top > c.bottom);
-
-    if (choque) {
-      clearInterval(dinoInterval);
-      msg6.textContent = "Has perdido";
-    }
-
-  }, 20);
+#dinoGame {
+  position: relative;
+  width: 600px;
+  height: 200px;
+  margin: 0 auto;
+  background: #fff;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 3px solid #5ad1ff;
 }
 
+#dino {
+  position: absolute;
+  width: 40px;
+  height: 50px;
+  background: #333;
+  bottom: 0;
+  left: 50px;
+}
+
+#cactus {
+  position: absolute;
+  width: 30px;
+  height: 50px;
+  background: green;
+  bottom: 0;
+  right: -50px;
+}
+
+.jump {
+  animation: jump 0.6s ease-out;
+}
+
+@keyframes jump {
+  0% { bottom: 0; }
+  50% { bottom: 120px; }
+  100% { bottom: 0; }
+}
