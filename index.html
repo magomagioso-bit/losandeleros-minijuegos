@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <title>Minijuegos con Niveles</title>
 <link rel="stylesheet" href="style.css">
+<script>
+function mostrarNivel(n) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("nivel" + n).classList.add("active");
+}
+
+function volverMenu() {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("menu").classList.add("active");
+}
+</script>
 </head>
 <body>
 
