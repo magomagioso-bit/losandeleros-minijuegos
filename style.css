@@ -66,6 +66,16 @@ button:hover {
   transform: translateY(-3px) scale(1.03);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
   filter: brightness(1.05);
+  /* Botón especial para Los Andeleros */
+.btn-andeleros {
+  background: linear-gradient(135deg, #5ad1ff, #3aa7d8);
+  color: #fff;
+  border: 2px solid #5ad1ff;
+}
+
+.btn-andeleros:hover {
+  filter: brightness(1.15);
+  transform: translateY(-3px) scale(1.03);
 }
 
 /* Inputs */
