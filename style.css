@@ -1,1 +1,272 @@
+/* ============================
+   ESTILO GENERAL
+============================ */
+body {
+    font-family: Arial, sans-serif;
+    background: #0a0f1a;
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    background: #5ad1ff;
+    border: none;
+    padding: 12px 20px;
+    margin: 8px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #7de3ff;
+}
+
+.locked {
+    background: #555 !important;
+    cursor: not-allowed;
+}
+
+/* ============================
+   TARJETAS SUPERIORES
+============================ */
+.card-top {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #111a2b;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #5ad1ff;
+    margin-left: 10px;
+    font-size: 18px;
+    z-index: 100;
+}
+
+/* ============================
+   BOTÓN DE SONIDO FLOTANTE
+============================ */
+#soundBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #111a2b;
+    border: 3px solid #5ad1ff;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 200;
+    transition: 0.2s;
+}
+
+#soundBtn:hover {
+    background: #1c2a3d;
+}
+
+/* ============================
+   PANELES
+============================ */
+.panel {
+    display: none;
+    padding: 20px;
+}
+
+.panel.active {
+    display: block;
+}
+
+/* ============================
+   NIVEL 1 – ADIVINA
+============================ */
+#nivel1 input {
+    padding: 10px;
+    font-size: 18px;
+    width: 200px;
+    border-radius: 8px;
+    border: none;
+    margin: 10px;
+}
+
+/* ============================
+   NIVEL 2 – BUSCAMINAS
+============================ */
+.buscaminas {
+    display: grid;
+    justify-content: center;
+    margin: 20px auto;
+}
+
+.cell {
+    width: 40px;
+    height: 40px;
+    background: #1b2a3a;
+    border: 2px solid #5ad1ff;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.cell.open {
+    background: #0f1826;
+}
+
+.cell.mine {
+    background: red;
+}
+
+/* ============================
+   NIVEL 3 – 3 EN RAYA
+============================ */
+#tresGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    justify-content: center;
+    margin: 20px auto;
+}
+
+.tresCelda {
+    width: 100px;
+    height: 100px;
+    background: #1b2a3a;
+    border: 3px solid #5ad1ff;
+    font-size: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* ============================
+   NIVEL 4 – SNAKE
+============================ */
+#snakeCanvas {
+    background: #111;
+    border: 3px solid #5ad1ff;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+/* ============================
+   NIVEL 5 – FLAPPY BIRD
+============================ */
+#flappyGame {
+    position: relative;
+    width: 350px;
+    height: 500px;
+    margin: 20px auto;
+    background: linear-gradient(#4ec0ca, #a0e0ff);
+    overflow: hidden;
+    border-radius: 16px;
+    border: 3px solid #5ad1ff;
+}
+
+#flappyBird {
+    position: absolute;
+    width: 40px;
+    height: 32px;
+    left: 80px;
+    top: 200px;
+    background-size: cover;
+    z-index: 10;
+    animation: birdFlap 0.18s steps(1) infinite;
+}
+
+@keyframes birdFlap {
+    0%   { background-image: url("bird.png"); }
+    33%  { background-image: url("bird2.png"); }
+    66%  { background-image: url("bird3.png"); }
+    100% { background-image: url("bird.png"); }
+}
+
+.pipe {
+    position: absolute;
+    width: 70px;
+    background: linear-gradient(#3cb043, #2a7c2a);
+    border: 3px solid #1f5a1f;
+    z-index: 5;
+}
+
+#pipeTop { top: 0; }
+#pipeBottom { bottom: 0; }
+
+#ground {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 60px;
+    background: url("https://i.imgur.com/3suvQhS.png");
+    background-size: contain;
+    animation: groundMove 1s linear infinite;
+    z-index: 6;
+}
+
+@keyframes groundMove {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+#startScreen, #gameOverScreen {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 40%;
+    font-size: 32px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px #000;
+    pointer-events: none;
+    z-index: 20;
+}
+
+/* ============================
+   NIVEL 6 – DINO RUNNER
+============================ */
+#dinoGame {
+    position: relative;
+    width: 500px;
+    height: 200px;
+    background: #1b2a3a;
+    border: 3px solid #5ad1ff;
+    margin: 20px auto;
+    overflow: hidden;
+}
+
+#dino {
+    position: absolute;
+    width: 40px;
+    height: 60px;
+    background: #5ad1ff;
+    bottom: 0;
+    left: 50px;
+    border-radius: 6px;
+}
+
+#cactus {
+    position: absolute;
+    width: 30px;
+    height: 50px;
+    background: #2ecc71;
+    bottom: 0;
+    left: 500px;
+    border-radius: 4px;
+}
+
+/* ============================
+   TEXTOS DE VICTORIA
+============================ */
+.victoria {
+    color: #5ad1ff;
+    font-weight: bold;
+    text-shadow: 0 0 10px #5ad1ff;
+}
 
