@@ -1,75 +1,118 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mantenimiento</title>
-
-<style>
-  *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
-  }
-
-  body{
-    height:100vh;
-    overflow:hidden;
-    background:#000;
-    color:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-  }
-
-  .box{
-    padding:30px;
-    border:1px solid #111;
-    background:#0a0a0a;
-    border-radius:12px;
-    box-shadow:0 0 20px #00aaff22;
-    max-width:600px;
-  }
-
-  h1{
-    color:#00aaff;
-    font-size:32px;
-    text-shadow:0 0 12px #00aaff;
-  }
-
-  p{
-    margin-top:15px;
-    color:#bbb;
-    line-height:1.5;
-  }
-
-  .dot{
-    margin-top:20px;
-    color:#00aaff;
-    font-weight:bold;
-    animation:blink 1.2s infinite;
-  }
-
-  @keyframes blink{
-    0%,100%{opacity:1;}
-    50%{opacity:0.2;}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minijuegos con Niveles</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-  <div class="box">
-    <h1>🚧 Mantenimiento en curso</h1>
-    <p>
-      Estamos mejorando la plataforma para ofrecer una mejor experiencia.<br>
-      Vuelve más tarde.
-    </p>
+    <!-- TARJETAS SUPERIORES -->
+    <div id="nivelBox" class="card-top">Nivel actual: <span id="nivel">1</span></div>
+    <div id="xpBox" class="card-top">XP: <span id="xp">0</span></div>
 
-    <div class="dot">● ● ●</div>
-  </div>
+    <!-- BOTÓN DE SONIDO FLOTANTE -->
+    <div id="soundBtn">🔊</div>
 
+    <!-- MENÚ PRINCIPAL -->
+    <div id="menu" class="panel active">
+        <h1>Minijuegos</h1>
+
+        <button onclick="mostrarNivel(1)">Nivel 1: Adivina</button>
+        <button onclick="mostrarNivel(2)" id="btn2" class="locked">Nivel 2: Buscaminas</button>
+        <button onclick="mostrarNivel(3)" id="btn3" class="locked">Nivel 3: 3 en Raya</button>
+        <button onclick="mostrarNivel(4)" id="btn4" class="locked">Nivel 4: Snake</button>
+        <button onclick="mostrarNivel(5)" id="btn5" class="locked">Nivel 5: Flappy Bird</button>
+        <button onclick="mostrarNivel(6)" id="btn6" class="locked">Nivel 6: Dino Runner</button>
+
+        <button onclick="window.location.href='https://losandeleros.onrender.com'">
+            🌐 Ir a Los Andeleros
+        </button>
+
+        <button onclick="reiniciarProgreso()">Reiniciar progreso</button>
+    </div>
+
+    <!-- NIVEL 1: ADIVINA -->
+    <div id="nivel1" class="panel">
+        <h2>Nivel 1 – Adivina el número</h2>
+        <button onclick="volverMenu()">Volver</button>
+
+        <p id="msg1"></p>
+        <input type="number" id="num" placeholder="Introduce un número">
+        <button onclick="comprobarNumero()">Comprobar</button>
+    </div>
+
+    <!-- NIVEL 2: BUSCAMINAS -->
+    <div id="nivel2" class="panel">
+        <h2>Nivel 2 – Buscaminas</h2>
+        <button onclick="volverMenu()">Volver</button>
+
+        <div id="buscaminasGrid" class="buscaminas"></div>
+        <p id="msg2"></p>
+    </div>
+
+    <!-- NIVEL 3: 3 EN RAYA -->
+    <div id="nivel3" class="panel">
+        <h2>Nivel 3 – 3 en Raya</h2>
+        <button onclick="volverMenu()">Volver</button>
+
+        <div id="tresGrid">
+            <div class="tresCelda"></div>
+            <div class="tresCelda"></div>
+            <div class="tresCelda"></div>
+            <div class="tresCelda"></div>
+            <div class="tresCelda"></div>
+            <div class="tresCelda"></div>
+            <div class="tresCelda"></div>
+            <div class="tresCelda"></div>
+            <div class="tresCelda"></div>
+        </div>
+
+        <p id="msg3"></p>
+    </div>
+
+    <!-- NIVEL 4: SNAKE -->
+    <div id="nivel4" class="panel">
+        <h2>Nivel 4 – Snake</h2>
+        <button onclick="volverMenu()">Volver</button>
+
+        <canvas id="snakeCanvas" width="400" height="400"></canvas>
+        <p id="msg4"></p>
+    </div>
+
+    <!-- NIVEL 5: FLAPPY BIRD -->
+    <div id="nivel5" class="panel">
+        <h2>Nivel 5 – Flappy Bird</h2>
+        <button onclick="volverMenu()">Volver</button>
+
+        <div id="flappyGame">
+            <div id="flappyBird"></div>
+            <div id="pipeTop" class="pipe"></div>
+            <div id="pipeBottom" class="pipe"></div>
+            <div id="ground"></div>
+            <div id="startScreen">Pulsa para empezar</div>
+            <div id="gameOverScreen">GAME OVER</div>
+        </div>
+
+        <p>Puntuación: <span id="flappyScore">0</span></p>
+        <p id="msg5"></p>
+    </div>
+
+    <!-- NIVEL 6: DINO RUNNER -->
+    <div id="nivel6" class="panel">
+        <h2>Nivel 6 – Dino Runner</h2>
+        <button onclick="volverMenu()">Volver</button>
+
+        <div id="dinoGame">
+            <div id="dino"></div>
+            <div id="cactus"></div>
+        </div>
+
+        <p id="msg6"></p>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
+
