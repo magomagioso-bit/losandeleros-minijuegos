@@ -127,17 +127,16 @@ function comprobarNumero() {
     playSound("tick", 0.4);
 
     if (num === secreto) {
-        msg.textContent = "¡Correcto!";
-        msg.classList.add("victoria");
-        playSound("correct");
-        ganarXP(20);
-        secreto = Math.floor(Math.random() * 10) + 1;
-    } else {
-        msg.textContent = "Incorrecto";
-        msg.classList.remove("victoria");
-        playSound("wrong");
-    }
+    msg.textContent = "¡Correcto!";
+    playSound("correct");
+} else if (num < secreto) {
+    msg.textContent = "Más alto";
+    playSound("wrong");
+} else {
+    msg.textContent = "Más bajo";
+    playSound("wrong");
 }
+
 
 /* ============================================================
    NIVEL 2 — BUSCAMINAS
