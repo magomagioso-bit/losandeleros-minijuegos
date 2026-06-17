@@ -5,6 +5,9 @@
 let audioCtx = null;
 let globalVolume = 0.7; // 70%
 let isMuted = false;
+document.addEventListener("click", () => {
+    initAudio();
+}, { once: true });
 
 const soundFiles = {
     jump: "sounds/jump.mp3",
@@ -124,17 +127,25 @@ function comprobarNumero() {
     const num = parseInt(document.getElementById("num").value);
     const msg = document.getElementById("msg1");
 
+    // Desbloquea el audio si aún no está activo
+    initAudio();
+
     playSound("tick", 0.4);
 
     if (num === secreto) {
-    msg.textContent = "¡Correcto!";
-    playSound("correct");
-} else if (num < secreto) {
-    msg.textContent = "Más alto";
-    playSound("wrong");
-} else {
-    msg.textContent = "Más bajo";
-    playSound("wrong");
+        msg.textContent = "¡Correcto!";
+        playSound("correct");
+        ganarXP(20);
+        secreto = Math.floor(Math.random() * 10) + 1;
+    } 
+    else if (num < secreto) {
+        msg.textContent = "Más alto";
+        playSound("wrong");
+    } 
+    else {
+        msg.textContent = "Más bajo";
+        playSound("wrong");
+    }
 }
 
 
