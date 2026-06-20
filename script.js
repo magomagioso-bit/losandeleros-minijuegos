@@ -2,9 +2,15 @@
    SISTEMA DE AUDIO PROFESIONAL (AudioContext + Mixer)
 ============================================================ */
 
+/* ============================
+   AUDIO PROFESIONAL
+============================ */
 let audioCtx = null;
 let globalVolume = 0.7; // 70%
 let isMuted = false;
+let audioReady = false;
+
+// Desbloquear audio con el primer clic en cualquier parte
 document.addEventListener("click", () => {
     initAudio();
 }, { once: true });
@@ -36,16 +42,20 @@ async function loadSound(name, url) {
 }
 
 async function initAudio() {
-    if (audioCtx) return;
+    if (audioCtx) return;              // ya iniciado
     audioCtx = new AudioContext();
 
     for (const s in soundFiles) {
         await loadSound(s, soundFiles[s]);
     }
+
+    audioReady = true;                 // ya se pueden reproducir sonidos
 }
 
 function playSound(name, volume = 1) {
-    if (!audioCtx || isMuted) return;
+    if (!audioCtx || isMuted || !audioReady) return;
+    if (!soundBuffers[name]) return;   // por si aún no se cargó
+
     const source = audioCtx.createBufferSource();
     source.buffer = soundBuffers[name];
 
@@ -157,50 +167,77 @@ const grid = document.getElementById("buscaminasGrid");
 let size = 5;
 let mines = 4;
 
-function iniciarBuscaminas() {
+   function iniciarBuscaminas() {
     grid.innerHTML = "";
     grid.style.gridTemplateColumns = `repeat(${size}, 40px)`;
 
+    let board = [];
+
+    // Crear tablero vacío
+    for (let i = 0; i < size; i++) {
+        board[i] = [];
+        for (let j = 0; j < size; j++) {
+            board[i][j] = { mine: false, number: 0 };
+        }
+    }
+
+    // Colocar minas
     let minePositions = new Set();
     while (minePositions.size < mines) {
         minePositions.add(Math.floor(Math.random() * size * size));
     }
 
-    for (let i = 0; i < size * size; i++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
+    minePositions.forEach(pos => {
+        let y = Math.floor(pos / size);
+        let x = pos % size;
+        board[y][x].mine = true;
+    });
 
-        if (minePositions.has(i)) {
-            cell.dataset.mine = "1";
-        }
+    // Calcular números
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            if (board[y][x].mine) continue;
 
-        cell.addEventListener("click", () => {
-            playSound("click", 0.5);
-
-            if (cell.dataset.mine) {
-                cell.classList.add("mine");
-                playSound("mine");
-                document.getElementById("msg2").textContent = "¡Has perdido!";
-            } else {
-                cell.classList.add("open");
-                playSound("click", 0.3);
-            }
-
-            if (!cell.dataset.mine) {
-                let abiertas = document.querySelectorAll(".cell.open").length;
-                if (abiertas >= size * size - mines) {
-                    playSound("win");
-                    document.getElementById("msg2").textContent = "¡Ganaste!";
-                    ganarXP(30);
+            let count = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    let ny = y + dy;
+                    let nx = x + dx;
+                    if (ny >= 0 && ny < size && nx >= 0 && nx < size) {
+                        if (board[ny][nx].mine) count++;
+                    }
                 }
             }
-        });
+            board[y][x].number = count;
+        }
+    }
 
-        grid.appendChild(cell);
+    // Renderizar
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+
+            cell.addEventListener("click", () => {
+                playSound("click", 0.5);
+
+                if (board[y][x].mine) {
+                    cell.classList.add("mine");
+                    playSound("mine");
+                    document.getElementById("msg2").textContent = "💥 BOOM — Has perdido";
+                } else {
+                    cell.classList.add("open");
+                    if (board[y][x].number > 0) {
+                        cell.textContent = board[y][x].number;
+                    }
+                }
+            });
+
+            grid.appendChild(cell);
+        }
     }
 }
 
-iniciarBuscaminas();
 
 /* ============================================================
    NIVEL 3 — 3 EN RAYA
@@ -279,12 +316,12 @@ function gameSnake() {
 setInterval(gameSnake, 100);
 
 document.addEventListener("keydown", e => {
-    playSound("move", 0.2); // volumen bajo opcional
+    playSound("move", 0.2);
 
-    if (e.key === "ArrowUp") dir = {x:0,y:-20};
-    if (e.key === "ArrowDown") dir = {x:0,y:20};
-    if (e.key === "ArrowLeft") dir = {x:-20,y:0};
-    if (e.key === "ArrowRight") dir = {x:20,y:0};
+    if (e.key === "ArrowUp" || e.key === "w") dir = {x:0,y:-20};
+    if (e.key === "ArrowDown" || e.key === "s") dir = {x:0,y:20};
+    if (e.key === "ArrowLeft" || e.key === "a") dir = {x:-20,y:0};
+    if (e.key === "ArrowRight" || e.key === "d") dir = {x:20,y:0};
 });
 
 /* ============================================================
@@ -299,6 +336,11 @@ let jumpStrength = -12;
 let pipeX = 350;
 let gap = 150;
 let score = 0;
+const startScreen = document.getElementById("startScreen");
+const gameOverScreen = document.getElementById("gameOverScreen");
+
+startScreen.style.display = "block";
+gameOverScreen.style.display = "none";
 
 function gameFlappy() {
     velocity += gravity;
@@ -320,6 +362,7 @@ function gameFlappy() {
     if (birdY > 460 || birdY < 0) {
         playSound("hit");
         flappyRunning = false;
+       gameOverScreen.style.display = "block";
         score = 0;
     }
 }
@@ -329,8 +372,12 @@ setInterval(() => {
 }, 20);
 
 document.getElementById("nivel5").addEventListener("click", () => {
+    initAudio();
+
     if (!flappyRunning) {
         flappyRunning = true;
+        startScreen.style.display = "none";
+        gameOverScreen.style.display = "none";
         playSound("flap", 0.5);
         velocity = jumpStrength;
     } else {
