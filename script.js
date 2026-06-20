@@ -114,6 +114,9 @@ desbloquearBotones();
 ============================================================ */
 
 function mostrarNivel(n) {
+   if (n === 1) {
+    document.getElementById("msg1").textContent = "Adivina un número entre 1 y 100";
+}
     if (n > nivel) return;
 
     document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
@@ -131,7 +134,7 @@ function volverMenu() {
    NIVEL 1 — ADIVINA EL NÚMERO
 ============================================================ */
 
-let secreto = Math.floor(Math.random() * 10) + 1;
+let secreto = Math.floor(Math.random() * 100) + 1;
 
 function comprobarNumero() {
     const num = parseInt(document.getElementById("num").value);
