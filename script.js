@@ -2,15 +2,11 @@
    SISTEMA DE AUDIO PROFESIONAL (AudioContext + Mixer)
 ============================================================ */
 
-/* ============================
-   AUDIO PROFESIONAL
-============================ */
 let audioCtx = null;
-let globalVolume = 0.7; // 70%
+let globalVolume = 0.7;
 let isMuted = false;
 let audioReady = false;
 
-// Desbloquear audio con el primer clic en cualquier parte
 document.addEventListener("click", () => {
     initAudio();
 }, { once: true });
@@ -42,19 +38,20 @@ async function loadSound(name, url) {
 }
 
 async function initAudio() {
-    if (audioCtx) return;              // ya iniciado
+    if (audioCtx) return;
+
     audioCtx = new AudioContext();
 
     for (const s in soundFiles) {
         await loadSound(s, soundFiles[s]);
     }
 
-    audioReady = true;                 // ya se pueden reproducir sonidos
+    audioReady = true;
 }
 
 function playSound(name, volume = 1) {
     if (!audioCtx || isMuted || !audioReady) return;
-    if (!soundBuffers[name]) return;   // por si aún no se cargó
+    if (!soundBuffers[name]) return;
 
     const source = audioCtx.createBufferSource();
     source.buffer = soundBuffers[name];
@@ -114,15 +111,12 @@ desbloquearBotones();
 ============================================================ */
 
 function mostrarNivel(n) {
-   if (n === 1) {
-    document.getElementById("msg1").textContent = "Adivina un número entre 1 y 100";
-}
     if (n > nivel) return;
 
     document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
     document.getElementById("nivel" + n).classList.add("active");
 
-    initAudio(); // activa audio al entrar en un nivel
+    initAudio();
 }
 
 function volverMenu() {
@@ -134,15 +128,13 @@ function volverMenu() {
    NIVEL 1 — ADIVINA EL NÚMERO
 ============================================================ */
 
-let secreto = Math.floor(Math.random() * 100) + 1;
+let secreto = Math.floor(Math.random() * 10) + 1;
 
 function comprobarNumero() {
     const num = parseInt(document.getElementById("num").value);
     const msg = document.getElementById("msg1");
 
-    // Desbloquea el audio si aún no está activo
     initAudio();
-
     playSound("tick", 0.4);
 
     if (num === secreto) {
@@ -150,41 +142,36 @@ function comprobarNumero() {
         playSound("correct");
         ganarXP(20);
         secreto = Math.floor(Math.random() * 10) + 1;
-    } 
-    else if (num < secreto) {
+    } else if (num < secreto) {
         msg.textContent = "Más alto";
         playSound("wrong");
-    } 
-    else {
+    } else {
         msg.textContent = "Más bajo";
         playSound("wrong");
     }
 }
 
-
 /* ============================================================
-   NIVEL 2 — BUSCAMINAS
+   NIVEL 2 — BUSCAMINAS (CON NÚMEROS)
 ============================================================ */
 
 const grid = document.getElementById("buscaminasGrid");
 let size = 5;
 let mines = 4;
 
-   function iniciarBuscaminas() {
+function iniciarBuscaminas() {
     grid.innerHTML = "";
     grid.style.gridTemplateColumns = `repeat(${size}, 40px)`;
 
     let board = [];
 
-    // Crear tablero vacío
-    for (let i = 0; i < size; i++) {
-        board[i] = [];
-        for (let j = 0; j < size; j++) {
-            board[i][j] = { mine: false, number: 0 };
+    for (let y = 0; y < size; y++) {
+        board[y] = [];
+        for (let x = 0; x < size; x++) {
+            board[y][x] = { mine: false, number: 0 };
         }
     }
 
-    // Colocar minas
     let minePositions = new Set();
     while (minePositions.size < mines) {
         minePositions.add(Math.floor(Math.random() * size * size));
@@ -196,7 +183,6 @@ let mines = 4;
         board[y][x].mine = true;
     });
 
-    // Calcular números
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
             if (board[y][x].mine) continue;
@@ -215,7 +201,6 @@ let mines = 4;
         }
     }
 
-    // Renderizar
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
             const cell = document.createElement("div");
@@ -225,10 +210,18 @@ let mines = 4;
                 playSound("click", 0.5);
 
                 if (board[y][x].mine) {
-                    cell.classList.add("mine");
-                    playSound("mine");
-                    document.getElementById("msg2").textContent = "💥 BOOM — Has perdido";
-                } else {
+    cell.classList.add("mine");
+    playSound("mine");
+    document.getElementById("msg2").textContent = "💥 BOOM — Has perdido";
+
+    // Reinicio automático después de 1 segundo
+    setTimeout(() => {
+        iniciarBuscaminas();
+        document.getElementById("msg2").textContent = "";
+    }, 1000);
+
+    return;
+} else {
                     cell.classList.add("open");
                     if (board[y][x].number > 0) {
                         cell.textContent = board[y][x].number;
@@ -241,6 +234,7 @@ let mines = 4;
     }
 }
 
+iniciarBuscaminas();
 
 /* ============================================================
    NIVEL 3 — 3 EN RAYA
@@ -278,7 +272,7 @@ function comprobarTres() {
 }
 
 /* ============================================================
-   NIVEL 4 — SNAKE
+   NIVEL 4 — SNAKE (POR PASOS + WASD)
 ============================================================ */
 
 const canvas = document.getElementById("snakeCanvas");
@@ -293,6 +287,15 @@ function gameSnake() {
     ctx.fillRect(0,0,400,400);
 
     snake.unshift({x: snake[0].x + dir.x, y: snake[0].y + dir.y});
+
+    if (dir.x === 0 && dir.y === 0) {
+        ctx.fillStyle = "#5ad1ff";
+        snake.forEach(s => ctx.fillRect(s.x, s.y, 20, 20));
+
+        ctx.fillStyle = "red";
+        ctx.fillRect(food.x, food.y, 20, 20);
+        return;
+    }
 
     if (snake[0].x === food.x && snake[0].y === food.y) {
         playSound("eat");
@@ -314,6 +317,8 @@ function gameSnake() {
 
     ctx.fillStyle = "red";
     ctx.fillRect(food.x, food.y, 20, 20);
+
+    dir = {x:0, y:0};
 }
 
 setInterval(gameSnake, 100);
@@ -328,7 +333,7 @@ document.addEventListener("keydown", e => {
 });
 
 /* ============================================================
-   NIVEL 5 — FLAPPY BIRD
+   NIVEL 5 — FLAPPY BIRD (TEXTOS CORREGIDOS)
 ============================================================ */
 
 let flappyRunning = false;
@@ -337,8 +342,8 @@ let velocity = 0;
 let gravity = 1.2;
 let jumpStrength = -12;
 let pipeX = 350;
-let gap = 150;
 let score = 0;
+
 const startScreen = document.getElementById("startScreen");
 const gameOverScreen = document.getElementById("gameOverScreen");
 
@@ -365,7 +370,7 @@ function gameFlappy() {
     if (birdY > 460 || birdY < 0) {
         playSound("hit");
         flappyRunning = false;
-       gameOverScreen.style.display = "block";
+        gameOverScreen.style.display = "block";
         score = 0;
     }
 }
@@ -412,7 +417,7 @@ function gameDino() {
     cactusX -= 6;
     if (cactusX < -30) {
         cactusX = 500;
-        playSound("run", 0.2); // volumen bajo opcional
+        playSound("run", 0.2);
         ganarXP(2);
     }
 
@@ -441,3 +446,4 @@ function reiniciarProgreso() {
     localStorage.clear();
     location.reload();
 }
+
